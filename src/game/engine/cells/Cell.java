@@ -3,8 +3,16 @@ package game.engine.cells;
 import game.engine.monsters.Monster;
 
 public class Cell {
+    
     private final String name;//read 
     private Monster monster;//read and write
+
+
+
+    public Cell(String name) {
+        this.name = name;
+        this.monster=null;
+    }    
 
     public String getName() {
         return name;
@@ -18,10 +26,7 @@ public class Cell {
         this.monster = monster;
     }
 
-    public Cell(String name) {
-        this.name = name;
-        this.monster=null;
-    }
+  
     
     
     
