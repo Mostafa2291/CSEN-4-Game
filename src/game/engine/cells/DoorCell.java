@@ -1,5 +1,5 @@
 package game.engine.cells;
-import game.engine.*;
+import game.engine.Role;
 
 public class DoorCell extends Cell {
 
