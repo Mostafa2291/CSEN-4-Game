@@ -92,7 +92,7 @@ public abstract class Monster implements Comparable <Monster> {
             }
         else
             {
-                this.position = position - 100;
+                this.position = position % 100;
             }
     }
 
