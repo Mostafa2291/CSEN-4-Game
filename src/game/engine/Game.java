@@ -18,12 +18,6 @@ public class Game {
     private Monster current;
 
 
-//work in progress waiting 4 dataloader to be done
-     //Game(Role playerRole) throws IOException{
-
-    // }
-
-
 //constructor 
 public Game(Role playerRole) throws IOException{
     
