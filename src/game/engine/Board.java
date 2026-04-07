@@ -3,13 +3,13 @@ package game.engine;
 import java.util.ArrayList;
 
 import game.engine.cards.Card;
-import game.engine.cells.Cell;
+import game.engine.cells.*;
 import game.engine.monsters.Monster;
 
 
 public class Board {
     //Read only
-   private final Cell[][] boardCells;
+   private Cell[][] boardCells;
    private static ArrayList<Card> originalCards; //removed final on purpose, as it cannot be initialised twice. (once in attribute and once in constructor)
 
    //Read & Write
@@ -20,9 +20,9 @@ public class Board {
    public Board(ArrayList<Card> readCards){
     this.boardCells = new Cell [Constants.BOARD_ROWS][Constants.BOARD_COLS];
 
-    Board.stationedMonsters = new ArrayList<>();
-    Board.cards = new ArrayList<>();
-    Board.originalCards = readCards;
+    stationedMonsters = new ArrayList<Monster>();
+    cards = new ArrayList<Card>();
+    originalCards = readCards;
 
    }
 

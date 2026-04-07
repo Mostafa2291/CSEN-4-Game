@@ -4,7 +4,7 @@ import game.engine.monsters.Monster;
 
 public class Cell {
     
-    private final String name;//read 
+    private String name;//read 
     private Monster monster;//read and write
 
 

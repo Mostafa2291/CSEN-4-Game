@@ -7,8 +7,8 @@ public class Dasher extends Monster {
     private int momentumTurns; //number of turns dasher will have ,momentum' it is R/W 
 
 
-    public Dasher(String name, String description, Role originalRole, int energy) {
-        super(name, description, originalRole, energy);
+    public Dasher(String name, String description, Role role, int energy) {
+        super(name, description, role, energy);
         
         this.momentumTurns = 0;
     }
@@ -20,10 +20,8 @@ public class Dasher extends Monster {
 
 
     public void setMomentumTurns(int momentumTurns) {
-        if(momentumTurns>=0)
-            this.momentumTurns = momentumTurns;
-        else  
-            this.momentumTurns = 0;
+        this.momentumTurns = momentumTurns;
+      
     }
 
     

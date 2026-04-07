@@ -5,8 +5,8 @@ import game.engine.interfaces.CanisterModifier;
 public class DoorCell extends Cell implements CanisterModifier {
 
     //Read only attributes
-    private final Role  role;
-    private final int  energy;
+    private Role  role;
+    private int  energy;
 
     //R&W attributes
     private boolean activated;
@@ -29,8 +29,8 @@ public class DoorCell extends Cell implements CanisterModifier {
     public boolean isActivated() {
         return activated;
     }
-    public void setActivated(boolean activated) {
-        this.activated = activated;
+    public void setActivated(boolean isActivated) {
+        this.activated = isActivated;
     }
    
     

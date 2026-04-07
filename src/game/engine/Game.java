@@ -2,16 +2,17 @@ package game.engine;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import game.engine.dataloader.DataLoader;
 import game.engine.monsters.Monster;
 
 public class Game {
 //read only
-     private final Board board;
-     private final ArrayList<Monster> allMonsters;
-     private final Monster player;
-     private final Monster opponent;
+     private Board board;
+     private ArrayList<Monster> allMonsters;
+     private Monster player;
+     private Monster opponent;
 
 
 //read and write
@@ -31,12 +32,7 @@ public Game(Role playerRole) throws IOException{
      player = selectRandomMonsterByRole(playerRole);
 
     //random selection of opponent
-    if(playerRole == Role.LAUGHER){ //assign opponent random scarer
-        opponent = selectRandomMonsterByRole(Role.SCARER);
-    }
-    else //assign opponent random laugher 
-        opponent = selectRandomMonsterByRole(Role.LAUGHER);
-
+    this.opponent = selectRandomMonsterByRole(playerRole == Role.SCARER ? Role.LAUGHER : Role.SCARER);
     this.current = player;    
 
     
@@ -68,20 +64,13 @@ public Game(Role playerRole) throws IOException{
      }
 
      
-    private Monster selectRandomMonsterByRole(Role role){
-        int size = allMonsters.size();
-        ArrayList <Monster> matchingMonster = new ArrayList<>();
-        for (int i = 0; i < size; i++) { //add all monsters that match given role to matchingMonster arraylist
-            if(allMonsters.get(i).getRole() == role ){
-                matchingMonster.add(allMonsters.get(i));
-            }
-        }
-
-        int randomIndex = (int) (Math.random()* matchingMonster.size());
-
-        return matchingMonster.get(randomIndex);
-
-    }
+   private Monster selectRandomMonsterByRole(Role role) {
+		Collections.shuffle(allMonsters);
+	    return allMonsters.stream()
+	    		.filter(m -> m.getRole() == role)
+	    		.findFirst()
+	    		.orElse(null);
+	}
 
 
 }

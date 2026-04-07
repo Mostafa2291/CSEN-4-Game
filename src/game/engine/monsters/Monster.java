@@ -4,9 +4,9 @@ import game.engine.Role;
 public abstract class Monster implements Comparable <Monster> {
 
     //Read only attributes 
-    private final String name; 
-    private final String description;
-    private final Role originalRole; 
+    private String name; 
+    private String description;
+    private Role originalRole; 
 
     //Read & Write attributes
     private Role role;
@@ -23,17 +23,10 @@ public abstract class Monster implements Comparable <Monster> {
         this.name = name;
         this.description = description;
         this.originalRole = originalRole;
-
-        if(energy>=0) //small safety line to make sure energy isnt initialised as less than 0
-            this.energy = energy;
-        else
-            this.energy = 0;
-
-        this.role = this.originalRole; //starts as initial role 
-
-        this.position = Constants.STARTING_POSITION; //initially start at first index
+        this.energy = energy;
+        this.role = originalRole; //starts as initial role 
+        this.position = 0;
         this.confusionTurns = 0; 
-
         this.frozen = false;
         this.shielded = false;
 
@@ -71,10 +64,7 @@ public abstract class Monster implements Comparable <Monster> {
 
 
     public void setEnergy(int energy) { //added constraint where energy if negative is set to 0
-        if(energy>=0)
-            this.energy = energy;
-        else
-            this.energy = 0;
+       this.energy = Math.max(Constants.MIN_ENERGY, energy);
        
     }
 
@@ -85,15 +75,9 @@ public abstract class Monster implements Comparable <Monster> {
 
 
     public void setPosition(int position) { //added constraints where postion must be between 0-99
-        if(position>= Constants.STARTING_POSITION &&
-        position<= Constants.WINNING_POSITION) 
-            {
-                this.position = position;
-            }
-        else
-            {
-                this.position = position % 100;
-            }
+        
+        this.position = position % Constants.BOARD_SIZE;
+
     }
 
 
@@ -123,16 +107,13 @@ public abstract class Monster implements Comparable <Monster> {
 
 
     public void setConfusionTurns(int confusionTurns) {
-        if(confusionTurns>=0)
-            this.confusionTurns = confusionTurns;
-        else
-            this.confusionTurns = 0;
-       
+      
+        this.confusionTurns = confusionTurns;
     }
 
     @Override
-    public int compareTo(Monster o){
-        return (Integer.compare(this.getPosition(), o.getPosition())); //if this.pos < o.pos --> -1  if this.pos> o.pos --> 1 else 0
+    public int compareTo(Monster other){
+        return this.position - other.position ;  //if this.pos < o.pos --> -1  if this.pos> o.pos --> 1 else 0
 
     }
 

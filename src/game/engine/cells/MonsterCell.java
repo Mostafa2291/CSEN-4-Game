@@ -1,10 +1,10 @@
 package game.engine.cells;
 
-import game.engine.monsters.Monster;
+import game.engine.monsters.*;
 
 public class MonsterCell extends Cell {
 
-    private final Monster cellMonster;//read only
+    private Monster cellMonster;//read only
 
     
     public MonsterCell(String name, Monster cellMonster) {

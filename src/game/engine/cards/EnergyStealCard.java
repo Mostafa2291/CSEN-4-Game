@@ -3,7 +3,7 @@ package game.engine.cards;
 import game.engine.interfaces.CanisterModifier;
 
 public class EnergyStealCard extends Card implements CanisterModifier {
-    private final int energy;//read only
+    private int energy;//read only
 
     public EnergyStealCard(String name, String description, int rarity, int energy) {
         super(name, description, rarity, true);
