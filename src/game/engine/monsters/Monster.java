@@ -32,6 +32,34 @@ public abstract class Monster implements Comparable <Monster> {
 
     }
 
+    public abstract void executePowerupEffect(Monster opponentMonster);
+
+
+
+    boolean isConfused(){
+        if(confusionTurns == 0)
+            return false;
+
+        return true;
+    }
+
+    void move(int distance){
+        setPosition(getPosition() + distance);
+    }
+
+     void alterEnergy(int energy){ //Do not override
+        
+
+     }
+
+
+
+
+
+
+
+
+
     //GETTERS for read only fields
     public String getName() {
         return name;
