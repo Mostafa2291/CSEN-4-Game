@@ -36,19 +36,24 @@ public abstract class Monster implements Comparable <Monster> {
 
 
 
-    boolean isConfused(){
-        if(confusionTurns == 0)
-            return false;
-
-        return true;
+    public boolean isConfused(){
+        return confusionTurns >0;
     }
 
-    void move(int distance){
+    public void move(int distance){
         setPosition(getPosition() + distance);
     }
 
-     void alterEnergy(int energy){ //Do not override
-        
+     public void alterEnergy(int energy){ //Do not override
+        //if shielded and change is negative, shield takes the hit and energy unchanged else energy altered
+        if(isShielded() && energy < 0){
+            setShielded(false);
+        }
+        else{ //if not shielded
+            setEnergy(getEnergy() + energy);
+
+        }
+
 
      }
 
