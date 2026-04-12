@@ -1,5 +1,7 @@
 package game.engine.cards;
 
+import game.engine.monsters.Monster;
+
 public abstract class Card {
 
     //Read only attributes
@@ -31,8 +33,13 @@ public abstract class Card {
     public boolean isLucky() {
         return lucky;
     }
+//method that executes the card’s unique effect on the player and/or opponent.
+    public abstract void performAction(Monster player, Monster opponent);
 
     
+
+
+
 
 
 
