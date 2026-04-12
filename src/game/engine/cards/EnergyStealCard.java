@@ -34,3 +34,4 @@ public class EnergyStealCard extends Card implements CanisterModifier {
             }
     }
 }
+}
