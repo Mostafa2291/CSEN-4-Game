@@ -14,24 +14,23 @@ public class EnergyStealCard extends Card implements CanisterModifier {
     public int getEnergy() {
         return energy;
     }
-   //method that executes the card’s unique effect on the player and/or opponent.
+
+    @Override
+    public void modifyCanisterEnergy(Monster monster, int canisterValue){
+        monster.alterEnergy(canisterValue);
+    }
+
      @Override
     public void performAction(Monster player, Monster opponent) {
         //if opponent is shielded, shield is removed and no energy is stolen
-        if(opponent.isShielded()==true){
+        if(opponent.isShielded()){
             opponent.setShielded(false);
+            return;
         }
         //if opponent is not shielded, player steals energy from opponent
-        else{
-            if(opponent.getEnergy() < this.energy){
-                player.alterEnergy(this.energy);
-                opponent.setEnergy(0);
-            }
-            //if opponent has enough energy to steal
-            else{
-                player.alterEnergy(this.energy);
-                opponent.alterEnergy(-energy);
-            }
-    }
+        int stolen = Math.min(opponent.getEnergy(), energy);
+        this.modifyCanisterEnergy(opponent,-stolen);
+        this.modifyCanisterEnergy(player, stolen);
+   
 }
 }
