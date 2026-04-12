@@ -10,7 +10,7 @@ public final class Constants {
     public static final int STARTING_POSITION = 0;
 
     //Special cells constant (snakes and ladders equiv)
-    public static final int []  MONSTER_CELL_INDICES = {2, 18, 34, 54, 82, 88};
+    public static final int []  MONSTER_CELL_INDICES = {2, 18, 34, 54, 82, 88}; //stationed monsters
     public static final int [] CONVEYOR_CELL_INDICES = {6, 22, 44, 52, 66}; //Start of the belt
     public static final int [] SOCK_CELL_INDICES = {32, 42, 74, 84, 98}; //Start of the sock 
     public static final int [] CARD_CELL_INDICES =  {4, 12, 28, 36, 48, 56, 60, 76, 86, 90};
