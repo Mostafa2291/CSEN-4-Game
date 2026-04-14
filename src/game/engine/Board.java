@@ -48,6 +48,15 @@ public class Board {
     Collections.shuffle(cards);
    }
 
+   public static Card drawCard(){
+        if(cards.isEmpty()){
+            reloadCards();
+        }
+        return cards.removeFirst();
+   }
+
+
+
 
    public  Cell[][] getBoardCells() {
     return boardCells;
