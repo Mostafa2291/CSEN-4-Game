@@ -35,10 +35,8 @@ public class Cell {
         }
     }
     public void onLand(Monster landingMonster, Monster opponentMonster){
-        this.setMonster(landingMonster);
     }
     public void transport(Monster monster){
-        this.setMonster(monster);
     }
     
 }
