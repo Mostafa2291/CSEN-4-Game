@@ -26,6 +26,24 @@ public class Board {
 
    }
 
+   private void setCardsByRarity(){
+    ArrayList <Card> fullDeck = new ArrayList<>();
+    for(int i = 0;i<originalCards.size();i++){
+        int copies = originalCards.get(i).getRarity(); //how many copies of each card
+
+        for(int j = 0; j<copies;j++){
+            fullDeck.add(originalCards.get(i));
+        }
+
+    }
+    Board.cards = fullDeck;
+
+   }
+
+   static void reloadCards(){
+    
+   }
+
 
    public  Cell[][] getBoardCells() {
     return boardCells;
