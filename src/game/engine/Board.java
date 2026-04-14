@@ -20,7 +20,7 @@ public class Board {
    
    public Board(ArrayList<Card> readCards){
     this.boardCells = new Cell [Constants.BOARD_ROWS][Constants.BOARD_COLS];
-
+    setCardsByRarity();
     stationedMonsters = new ArrayList<Monster>();
     cards = new ArrayList<Card>();
     originalCards = readCards;
