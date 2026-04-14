@@ -44,7 +44,7 @@ public class Board {
    }
 
    public static void reloadCards(){
-    
+   cards.addAll(originalCards);
     Collections.shuffle(cards);
    }
 
