@@ -11,8 +11,8 @@ public class ConfusionCard extends Card {
     public int getDuration() {
         return duration;
     }
-
+   
+    
 
       
-
 }

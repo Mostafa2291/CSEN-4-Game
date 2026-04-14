@@ -25,10 +25,20 @@ public class Cell {
     public void setMonster(Monster monster) {
         this.monster = monster;
     }
-
-  
+    //checks if cell is occupied by a monster or not
+    public boolean isOccupied() {
+        if(this.getMonster()==null){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+    public void onLand(Monster landingMonster, Monster opponentMonster){
+        this.setMonster(landingMonster);
+    }
+    public void transport(Monster monster){
+        this.setMonster(monster);
+    }
     
-    
-    
-
 }
