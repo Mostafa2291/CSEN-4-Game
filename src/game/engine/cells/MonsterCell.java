@@ -1,5 +1,7 @@
 package game.engine.cells;
 
+import javax.management.relation.Role;
+
 import game.engine.monsters.*;
 
 public class MonsterCell extends Cell {
@@ -15,7 +17,12 @@ public class MonsterCell extends Cell {
     public Monster getCellMonster() {
         return cellMonster;
     }
-
+    public void onLand(Monster landingMonster, Monster opponentMonster){
+      if(landingMonster.getRole()==cellMonster.getRole()){
+        landingMonster.executePowerupEffect
+        
+       
+    }
  
      
 
