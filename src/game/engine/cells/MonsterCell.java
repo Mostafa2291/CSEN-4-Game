@@ -1,7 +1,4 @@
 package game.engine.cells;
-
-import javax.management.relation.Role;
-
 import game.engine.monsters.*;
 
 public class MonsterCell extends Cell {
