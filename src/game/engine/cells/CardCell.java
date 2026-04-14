@@ -10,11 +10,11 @@ public class CardCell extends  Cell  {
     }
     
 
-
+//work in progress
 @Override
     public void onLand(Monster landingMonster, Monster opponentMonster) {
         super.onLand(landingMonster, opponentMonster);
-        Card card = Board.getCards();
+        Card card ;
         card.performAction(landingMonster, opponentMonster);
         }
     }
