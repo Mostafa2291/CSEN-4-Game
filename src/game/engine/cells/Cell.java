@@ -35,8 +35,8 @@ public class Cell {
         }
     }
     public void onLand(Monster landingMonster, Monster opponentMonster){
+     setMonster(landingMonster); 
     }
-    public void transport(Monster monster){
-    }
+   
     
 }
