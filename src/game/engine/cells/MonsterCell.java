@@ -19,6 +19,7 @@ public class MonsterCell extends Cell {
     }
     @Override
     public void onLand(Monster landingMonster, Monster opponentMonster){
+        super.onLand(landingMonster, opponentMonster);
         //if the landing monster has the same role as the cell monster, it executes its powerup effect on the opponent monster
       if(landingMonster.getRole()==cellMonster.getRole()){
         landingMonster.executePowerupEffect(opponentMonster);
@@ -28,14 +29,16 @@ public class MonsterCell extends Cell {
         //
         if(landingMonster.getEnergy()>cellMonster.getEnergy()){
             //if the landing monster is shielded, it loses its shield and the cell monster's energy becomes the landing monster's energy
-            if(landingMonster.isShielded()==true){
+            if(landingMonster.isShielded()){
                 landingMonster.setShielded(false);
                 cellMonster.setEnergy(landingMonster.getEnergy());
             }
-            //if the landing monster is not shielded,they swap their energy values
+            else{ //else the landing monster is not shielded,they swap their energy values
+            
                 int tmpenergy=landingMonster.getEnergy();
                 landingMonster.setEnergy(cellMonster.getEnergy());
                 cellMonster.setEnergy(tmpenergy);
+                }
             }
            
         }
