@@ -10,12 +10,14 @@ public class CardCell extends  Cell  {
     }
     
 
-//work in progress
+//i think i did this correct? honestly no idea
 @Override
     public void onLand(Monster landingMonster, Monster opponentMonster) {
         super.onLand(landingMonster, opponentMonster);
-        Card card ;
-        card.performAction(landingMonster, opponentMonster);
+        Card landedCard = Board.drawCard();
+        landedCard.performAction(landingMonster, opponentMonster);
         }
+
+
     }
     
