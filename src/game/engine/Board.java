@@ -21,6 +21,7 @@ public class Board {
    public Board(ArrayList<Card> readCards){
     this.boardCells = new Cell [Constants.BOARD_ROWS][Constants.BOARD_COLS];
     setCardsByRarity();
+    reloadCards();
     stationedMonsters = new ArrayList<Monster>();
     cards = new ArrayList<Card>();
     originalCards = readCards;
@@ -40,7 +41,7 @@ public class Board {
 
     }
     originalCards = fullDeck;
-
+    
    }
 
    public static void reloadCards(){
