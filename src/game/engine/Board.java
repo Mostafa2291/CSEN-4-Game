@@ -1,6 +1,7 @@
 package game.engine;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import game.engine.cards.Card;
 import game.engine.cells.*;
@@ -23,25 +24,28 @@ public class Board {
     stationedMonsters = new ArrayList<Monster>();
     cards = new ArrayList<Card>();
     originalCards = readCards;
-
+    
    }
 
    private void setCardsByRarity(){
     ArrayList <Card> fullDeck = new ArrayList<>();
     for(int i = 0;i<originalCards.size();i++){
-        int copies = originalCards.get(i).getRarity(); //how many copies of each card
+        Card currentCard = originalCards.get(i);
+
+        int copies = currentCard.getRarity(); //how many copies of each card
 
         for(int j = 0; j<copies;j++){
-            fullDeck.add(originalCards.get(i));
+            fullDeck.add(currentCard);
         }
 
     }
-    Board.cards = fullDeck;
+    originalCards = fullDeck;
 
    }
 
-   static void reloadCards(){
+   public static void reloadCards(){
     
+    Collections.shuffle(cards);
    }
 
 
