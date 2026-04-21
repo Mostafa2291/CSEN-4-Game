@@ -68,6 +68,13 @@ public class Board {
     return new int[]{row,col};
     
    }
+   private Cell getCell(int index) {
+    int[]pos = indexToRowCol(index);
+    int row = pos[0];
+    int col = pos[1];
+   
+    return  boardCells[row][col];
+}
 
 
    public  Cell[][] getBoardCells() {
