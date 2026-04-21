@@ -17,14 +17,14 @@ public class Board {
    private static ArrayList<Monster> stationedMonsters;
    public static ArrayList<Card> cards;
 
-   
+
    public Board(ArrayList<Card> readCards){
     this.boardCells = new Cell [Constants.BOARD_ROWS][Constants.BOARD_COLS];
-    setCardsByRarity();
-    reloadCards();
     stationedMonsters = new ArrayList<Monster>();
     cards = new ArrayList<Card>();
     originalCards = readCards;
+    setCardsByRarity();
+    reloadCards();
     
    }
 
