@@ -56,7 +56,18 @@ public class Board {
         return cards.removeFirst();
    }
 
-
+   private int [] indexToRowCol(int index){
+    int size = 10;
+    int row = index/size;
+    int col;
+    if(row%2 ==0){
+        col = index %size;
+    }
+    else
+        col = size -1-(index%size);
+    return new int[]{row,col};
+    
+   }
 
 
    public  Cell[][] getBoardCells() {
