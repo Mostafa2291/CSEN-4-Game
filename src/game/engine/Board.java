@@ -73,7 +73,14 @@ public class Board {
     int row = pos[0];
     int col = pos[1];
    
-    return  boardCells[row][col];
+    return boardCells[row][col];
+}
+
+    private void setCell(int index, Cell cell) {
+    int[] pos = indexToRowCol(index);
+    int row = pos[0];
+    int col = pos[1];
+    boardCells[row][col] = cell;
 }
 
 
