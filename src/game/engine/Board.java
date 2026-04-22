@@ -1,5 +1,6 @@
 package game.engine;
 
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -132,6 +133,27 @@ private boolean belongs(int n , int [] arr){
         }
     }
     return false;
+}
+
+
+private void updateMonsterPositions(Monster player, Monster opponent){
+
+    for(int i = 0; i<Constants.BOARD_SIZE;i++){
+        Cell tempCell = getCell(i);
+        if(tempCell.isOccupied()){
+            tempCell.setMonster(null);
+        }
+        
+    }
+    int playerPos = player.getPosition();
+    int oppPos = opponent.getPosition();
+
+    Cell playerCell = getCell(playerPos);
+    Cell oppCell = getCell(oppPos);
+
+    playerCell.setMonster(player);
+    oppCell.setMonster(opponent);
+
 }
 
 
