@@ -7,6 +7,7 @@ import java.util.Collections;
 
 import game.engine.cards.Card;
 import game.engine.cells.*;
+import game.engine.exceptions.InvalidMoveException;
 import game.engine.monsters.Monster;
 
 
@@ -134,6 +135,42 @@ private boolean belongs(int n , int [] arr){
     }
     return false;
 }
+
+
+
+
+void moveMonster(Monster currentMonster, int roll, Monster opponentMonster) throws InvalidMoveException{
+    int oldPos = currentMonster.getPosition();
+
+    boolean currentWasConfused = currentMonster.getConfusionTurns()>0;
+    boolean opponentWasConfused = opponentMonster.getConfusionTurns() >0;
+
+
+    try{
+        currentMonster.move(roll);
+        Cell landedCell = getCell(currentMonster.getPosition());
+        landedCell.onLand(currentMonster, opponentMonster);
+
+        if(currentMonster.getPosition() == opponentMonster.getPosition()){//invalid move exception
+            currentMonster.setPosition(oldPos);
+            throw new InvalidMoveException();
+        }
+
+        if(currentWasConfused){
+            currentMonster.decrementConfusion();
+        }
+        if(opponentWasConfused){
+            opponentMonster.decrementConfusion();
+        }
+    }
+        finally{
+            updateMonsterPositions(currentMonster, opponentMonster);
+        }
+
+    
+
+}
+
 
 
 private void updateMonsterPositions(Monster player, Monster opponent){
