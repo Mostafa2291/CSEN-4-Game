@@ -3,6 +3,7 @@ package game.engine;
 import java.util.ArrayList;
 import java.util.Collections;
 
+
 import game.engine.cards.Card;
 import game.engine.cells.*;
 import game.engine.monsters.Monster;
@@ -82,6 +83,40 @@ public class Board {
     int col = pos[1];
     boardCells[row][col] = cell;
 }
+void initializeBoard(ArrayList<Cell> specialCells){
+    int place = 1;
+    for(int i=0;i<=49;i++){
+        setCell(place, specialCells.get(i));
+        place += 2;
+    }
+      
+    for(int i=0;i<= Constants.MONSTER_CELL_INDICES.length;i++){
+        setCell(Constants.MONSTER_CELL_INDICES[i],new MonsterCell("MonsterCell", stationedMonsters.get(i)));    
+   }
+   int co=0;
+   int co2=0;
+    for(int i=50;i<=59;i++  ){
+        if(specialCells.get(i) instanceof ConveyorBelt){
+            setCell(Constants.CONVEYOR_CELL_INDICES[co], specialCells.get(i));
+            co++;}
+            else{
+                setCell(Constants.SOCK_CELL_INDICES[co2], specialCells.get(i));
+                co2++;
+            }
+        }
+for(int i=0;i<= Constants.CARD_CELL_INDICES.length;i++){
+        setCell(Constants.CARD_CELL_INDICES[i],new CardCell("Card Cell"));    
+        }
+    for(int i=0;i<100;i++){
+        if(getCell(i) == null){
+            setCell(i, new Cell("Normal Cell"));
+        }
+    }
+         
+    }
+
+
+    
 
 
    public  Cell[][] getBoardCells() {
@@ -103,9 +138,18 @@ public class Board {
     Board.cards = cards;
    }
    
+        
+    }
+
+
+
+        
+
+    
+    
 
    
 
 
 
-}
+
