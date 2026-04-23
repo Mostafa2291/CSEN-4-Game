@@ -44,7 +44,7 @@ public abstract class Monster implements Comparable <Monster> {
         setPosition(getPosition() + distance);
     }
 
-     public void alterEnergy(int energy){ //Do not override
+     public final void alterEnergy(int energy){ //Do not override
         //if shielded and change is negative, shield takes the hit and energy unchanged else energy altered
         if(isShielded() && energy < 0){
             setShielded(false);
