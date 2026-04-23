@@ -88,6 +88,9 @@ public class Board {
 
 
 public void initializeBoard(ArrayList<Cell> specialCells){
+
+
+    
     int doorplace = 1;
     int sockcount = 0;
     int beltcount = 0;
@@ -112,10 +115,16 @@ public void initializeBoard(ArrayList<Cell> specialCells){
 
     for(int i = 0; i<Constants.BOARD_SIZE;i++){
         if(belongs(i, Constants.MONSTER_CELL_INDICES)){
-            int safeIndex = countmonster % stationedMonsters.size();
-            Monster tempMonster = stationedMonsters.get(safeIndex);
-            setCell(i,new MonsterCell(tempMonster.getName(),tempMonster));
-            countmonster++;
+          
+            if (stationedMonsters != null && stationedMonsters.size() > 0) {
+                int safeIndex = countmonster % stationedMonsters.size();
+                Monster tempMonster = stationedMonsters.get(safeIndex);
+                setCell(i, new MonsterCell(tempMonster.getName(), tempMonster));
+                countmonster++;
+            } else {
+                // If the test gives us 0 monsters, just place a normal blank cell
+                setCell(i, new Cell(null));
+            }
 
         }
         else if(belongs(i,Constants.CARD_CELL_INDICES)){
@@ -126,8 +135,8 @@ public void initializeBoard(ArrayList<Cell> specialCells){
              setCell(i, new Cell(null));
         }
     }
-}
 
+}
 private boolean belongs(int n , int [] arr){
     for(int i= 0;i<arr.length;i++){
         if(n == arr[i]){
