@@ -112,7 +112,8 @@ public void initializeBoard(ArrayList<Cell> specialCells){
 
     for(int i = 0; i<Constants.BOARD_SIZE;i++){
         if(belongs(i, Constants.MONSTER_CELL_INDICES)){
-            Monster tempMonster = stationedMonsters.get(countmonster);
+            int safeIndex = countmonster % stationedMonsters.size();
+            Monster tempMonster = stationedMonsters.get(safeIndex);
             setCell(i,new MonsterCell(tempMonster.getName(),tempMonster));
             countmonster++;
 
