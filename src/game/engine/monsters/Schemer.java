@@ -39,12 +39,8 @@ public class Schemer extends Monster {
     public void setEnergy(int energy){ //add 10 energy to all energy CHANGES
         int difference = energy - getEnergy();
 
-        if(difference != 0){//if there was a change in energy add 10 to it 
-            super.setEnergy(energy + 10);
-        }
-        else{ //if there was no change in energy 
-            super.setEnergy(energy);
+       super.setEnergy(energy + 10);
         }
             
     }
-}
+
