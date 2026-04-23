@@ -9,11 +9,6 @@ public class ConveyorBelt extends TransportCell {
     }
     
     
-    @Override
-    //when a monster lands on the conveyor belt, it gets transported
-    public void onLand(Monster landingMonster, Monster opponentMonster){
-        super.onLand(landingMonster, opponentMonster);
-        this.transport(landingMonster);
-    }
+    
 
 }
