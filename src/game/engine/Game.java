@@ -61,7 +61,7 @@ private int rollDice(){
     return (int)(Math.random() * 6) + 1;
 }
 
- void usePowerup() throws OutOfEnergyException {
+ public void usePowerup() throws OutOfEnergyException {
 // A method that activates the current monster’s powerup if the current monster has sufficient energy
 
     int currentEnergy = current.getEnergy();
@@ -119,24 +119,24 @@ private int rollDice(){
      * The turn is then switched to the other monster.
      */
     public void playTurn() throws InvalidMoveException {
+        try {
         // If the monster is frozen, its turn is skipped and it is unfrozen.
         if (current.isFrozen()) {
             current.setFrozen(false);
-            switchTurn();
+            
         } else {
             // Otherwise, the dice is rolled and the monster is moved on the board.
             int roll = rollDice();
-            try {
+            
                 board.moveMonster(current, roll, getCurrentOpponent());
-            } catch (InvalidMoveException e) {
-                // Case if player lands on opponent: the move is invalid, but turn still switches.
-                throw e;
-            } finally {
+        } 
+        }
+        finally {
                 // The turn is then switched to the other monster.
                 switchTurn();
             }
         }
-    }
+    
 
     /**
      * A method that transfers turn to the other monster.

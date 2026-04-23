@@ -87,7 +87,7 @@ public class Board {
 }
 
 
-void initializeBoard(ArrayList<Cell> specialCells){
+public void initializeBoard(ArrayList<Cell> specialCells){
     int doorplace = 1;
     int sockcount = 0;
     int beltcount = 0;
@@ -139,7 +139,7 @@ private boolean belongs(int n , int [] arr){
 
 
 
-void moveMonster(Monster currentMonster, int roll, Monster opponentMonster) throws InvalidMoveException{
+public void moveMonster(Monster currentMonster, int roll, Monster opponentMonster) throws InvalidMoveException{
     int oldPos = currentMonster.getPosition();
 
     boolean currentWasConfused = currentMonster.getConfusionTurns()>0;
