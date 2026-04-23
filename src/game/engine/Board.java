@@ -119,6 +119,7 @@ public void initializeBoard(ArrayList<Cell> specialCells){
             if (stationedMonsters != null && stationedMonsters.size() > 0) {
                 int safeIndex = countmonster % stationedMonsters.size();
                 Monster tempMonster = stationedMonsters.get(safeIndex);
+                tempMonster.setPosition(i);
                 setCell(i, new MonsterCell(tempMonster.getName(), tempMonster));
                 countmonster++;
             } else {
