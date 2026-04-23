@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import game.engine.dataloader.DataLoader;
+import game.engine.exceptions.InvalidMoveException;
+import game.engine.exceptions.OutOfEnergyException;
 import game.engine.monsters.Monster;
+
 
 public class Game {
 //read only
@@ -37,6 +40,38 @@ public Game(Role playerRole) throws IOException{
 
     
 }
+
+private Monster getCurrentOpponent(){
+    //A method that returns the monster that is not the current active monster
+    if(current == player){
+        return opponent;
+    } else {
+        return player;
+    }
+}
+
+
+private int rollDice(){
+// A method that returns a uniformly random integer between 1 and 6 inclusive
+    return (int)(Math.random() * 6) + 1;
+}
+
+ void usePowerup() throws OutOfEnergyException {
+// A method that activates the current monster’s powerup if the current monster has sufficient energy
+
+    int currentEnergy = current.getEnergy();
+
+    if (currentEnergy < Constants.POWERUP_COST) {
+        throw new OutOfEnergyException("Not enough energy to use powerup.");
+    }
+    else{
+    Monster opponent = getCurrentOpponent();
+
+    current.setEnergy(currentEnergy - Constants.POWERUP_COST);
+    current.executePowerupEffect(opponent); 
+    }
+ }
+
 
 
      public Board getBoard() {
