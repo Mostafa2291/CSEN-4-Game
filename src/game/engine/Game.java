@@ -38,7 +38,12 @@ public Game(Role playerRole) throws IOException{
     this.opponent = selectRandomMonsterByRole(playerRole == Role.SCARER ? Role.LAUGHER : Role.SCARER);
     this.current = player;    
 
-    
+    ArrayList<Monster> stationedMonsters = new ArrayList<>(allMonsters);
+    stationedMonsters.remove(player);
+    stationedMonsters.remove(opponent);
+    Board.setStationedMonsters(stationedMonsters);
+
+    board.initializeBoard(DataLoader.readCells());
 }
 
 private Monster getCurrentOpponent(){
@@ -107,5 +112,62 @@ private int rollDice(){
 	    		.orElse(null);
 	}
 
+    /**
+     * A method that performs one full turn for the current monster.
+     * If the monster is frozen, its turn is skipped and it is unfrozen.
+     * Otherwise, the dice is rolled and the monster is moved on the board.
+     * The turn is then switched to the other monster.
+     */
+    public void playTurn() throws InvalidMoveException {
+        // If the monster is frozen, its turn is skipped and it is unfrozen.
+        if (current.isFrozen()) {
+            current.setFrozen(false);
+            switchTurn();
+        } else {
+            // Otherwise, the dice is rolled and the monster is moved on the board.
+            int roll = rollDice();
+            try {
+                board.moveMonster(current, roll, getCurrentOpponent());
+            } catch (InvalidMoveException e) {
+                // Case if player lands on opponent: the move is invalid, but turn still switches.
+                throw e;
+            } finally {
+                // The turn is then switched to the other monster.
+                switchTurn();
+            }
+        }
+    }
+
+    /**
+     * A method that transfers turn to the other monster.
+     */
+    private void switchTurn() {
+        if (current == player) {
+            current = opponent;
+        } else {
+            current = player;
+        }
+    }
+
+    /**
+     * A method that evaluates whether the given monster satisfies all conditions required to win the game.
+     */
+    private boolean checkWinCondition(Monster monster) {
+        // A monster wins if it reaches the winning position and has energy greater than or equal to the winning energy.
+        return monster.getPosition() == Constants.WINNING_POSITION && monster.getEnergy() >= Constants.WINNING_ENERGY;
+    }
+
+    /**
+     * A method that determines if either monster has met the win condition.
+     * Returns the winning monster if one exists, otherwise returns null.
+     */
+    public Monster getWinner() {
+        if (checkWinCondition(player)) {
+            return player;
+        } else if (checkWinCondition(opponent)) {
+            return opponent;
+        }
+        return null;
+    }
 
 }
