@@ -154,7 +154,6 @@ public void moveMonster(Monster currentMonster, int roll, Monster opponentMonste
     int oldPos = currentMonster.getPosition();
 
     boolean currentWasConfused = currentMonster.getConfusionTurns()>0;
-    boolean opponentWasConfused = opponentMonster.getConfusionTurns() >0;
 
 
     try{
@@ -169,9 +168,6 @@ public void moveMonster(Monster currentMonster, int roll, Monster opponentMonste
 
         if(currentWasConfused){
             currentMonster.decrementConfusion();
-        }
-        if(opponentWasConfused){
-            opponentMonster.decrementConfusion();
         }
     }
         finally{
