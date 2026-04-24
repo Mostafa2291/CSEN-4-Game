@@ -37,7 +37,6 @@ public class Schemer extends Monster {
 
     @Override
     public void setEnergy(int energy){ //add 10 energy to all energy CHANGES
-        int difference = energy - getEnergy();
 
        super.setEnergy(energy + 10);
         }
