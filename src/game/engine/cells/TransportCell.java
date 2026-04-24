@@ -10,7 +10,7 @@ public abstract class TransportCell extends Cell {
     }
 
     public void transport(Monster monster){
-
+        monster.setPosition(monster.getPosition() + this.effect);
     }
 
     @Override
