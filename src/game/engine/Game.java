@@ -38,10 +38,12 @@ public Game(Role playerRole) throws IOException{
     this.opponent = selectRandomMonsterByRole(playerRole == Role.SCARER ? Role.LAUGHER : Role.SCARER);
     this.current = player;    
 
-    ArrayList<Monster> stationedMonsters = new ArrayList<>(allMonsters);
-    stationedMonsters.remove(player);
-    stationedMonsters.remove(opponent);
-    Board.setStationedMonsters(stationedMonsters);
+    player.setPosition(0);
+    opponent.setPosition(0);
+
+    allMonsters.remove(player);
+    allMonsters.remove(opponent);
+    Board.setStationedMonsters(allMonsters);
 
     board.initializeBoard(DataLoader.readCells());
 }
