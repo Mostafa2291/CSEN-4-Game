@@ -3,41 +3,39 @@ package game.engine.monsters;
 import game.engine.Role;
 
 public class Dasher extends Monster {
+	private int momentumTurns;
 
-    private int momentumTurns; //number of turns dasher will have ,momentum' it is R/W 
+	public Dasher(String name, String description, Role role, int energy) {
+		super(name, description, role, energy);
+		this.momentumTurns = 0;
+	}
+	
+	public int getMomentumTurns() {
+		return momentumTurns;
+	}
+	
+	public void setMomentumTurns(int momentumTurns) {
+		this.momentumTurns = momentumTurns;
+	}
 
-
-    public Dasher(String name, String description, Role role, int energy) {
-        super(name, description, role, energy);
-        
-        this.momentumTurns = 0;
-    }
-
-    @Override
-    public void executePowerupEffect(Monster opponentMonster){ //sets momentum turns to 3
-        setMomentumTurns(3);
-    }  
-    @Override
-    public void move(int distance){
-        if(getMomentumTurns() >0){ //multiply distance by 3
-            super.move(distance * 3);
-            setMomentumTurns(getMomentumTurns()-1);
-        }
-        else{ //momentum turns = 0
-            super.move(distance * 2);
-            }
-    }
-
-    public int getMomentumTurns() {
-        return momentumTurns;
-    }
-
-
-    public void setMomentumTurns(int momentumTurns) {
-        this.momentumTurns = momentumTurns;
-      
-    }
-
-    
-
+	@Override
+	public void executePowerupEffect(Monster opponentMonster) {
+		this.setMomentumTurns(3);
+		System.out.println(getName() + " activated Momentum Rush! 3x speed for 3 turns!");
+	}
+	
+	@Override
+	public void move(int distance) {
+		if (momentumTurns > 0) {
+	        System.out.println(getName() + " using Momentum! (" + momentumTurns + " turns left)");
+	        momentumTurns--;
+	        distance *= 3;
+	    } 
+		
+		else 
+	        distance *= 2;
+	    
+	    super.move(distance);
+	}
+	
 }

@@ -1,45 +1,38 @@
 package game.engine.monsters;
-import java.util.ArrayList;
 
 import game.engine.Board;
 import game.engine.Constants;
 import game.engine.Role;
 
 public class Schemer extends Monster {
+	
+	public Schemer(String name, String description, Role role, int energy) {
+		super(name, description, role, energy);
+	}
+	
+	@Override
+	public void setEnergy(int energy) {
+		super.setEnergy(energy + Constants.SCHEMER_STEAL);
+	}
 
-    public Schemer(String name, String description, Role role, int energy) {
-        super(name, description, role, energy);
-    }
+	@Override
+	public void executePowerupEffect(Monster opponentMonster) {
+	    System.out.println(getName() + " uses Chain Attack!");
+	    int totalStolen = stealEnergyFrom(opponentMonster);
 
+	    for (Monster target : Board.getStationedMonsters()) {
+	        totalStolen += stealEnergyFrom(target);
+	        System.out.println("  -> Stole from " + target.getName());
+	    }
 
+	    this.setEnergy(this.getEnergy() + totalStolen);
+	    System.out.println("Total stolen: " + totalStolen + " energy!");
+	}
+	
+	private int stealEnergyFrom(Monster target) {
+	    int stolen = Math.min(Constants.SCHEMER_STEAL, target.getEnergy());
+	    target.setEnergy(target.getEnergy() - stolen);
+	    return stolen;
+	}
 
-
-    public void executePowerupEffect(Monster opponentMonster){
-        int stolen = stealEnergyFrom(opponentMonster);
-
-        ArrayList <Monster> stationed  = Board.getStationedMonsters();
-
-        for (int i = 0; i < stationed.size() ; i++) {
-            Monster current = stationed.get(i);
-            stolen = stolen + stealEnergyFrom(current);
-        }
-        setEnergy(getEnergy() + stolen);
-    }
-
-
-    private int stealEnergyFrom(Monster target){ //disregards target shield
-        int stolen = Math.min(target.getEnergy(), Constants.SCHEMER_STEAL); //steal whatevers lower the target or schemer steal
-        
-        target.setEnergy(target.getEnergy() - stolen);
-        return stolen;
-
-    }
-
-    @Override
-    public void setEnergy(int energy){ //add 10 energy to all energy CHANGES
-
-       super.setEnergy(energy + 10);
-        }
-            
-    }
-
+}
