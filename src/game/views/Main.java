@@ -16,7 +16,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 
 public class Main extends Application {
 
@@ -35,10 +36,10 @@ public class Main extends Application {
 
         
 
-        javafx.scene.layout.VBox layout = new javafx.scene.layout.VBox(15); // 15px gap between buttons
+       VBox layout = new VBox(15); // 15px gap between buttons
         layout.setAlignment(javafx.geometry.Pos.CENTER); // Put the menu in the middle
 
-        javafx.scene.layout.HBox roleout = new javafx.scene.layout.HBox(50);
+        HBox roleout = new javafx.scene.layout.HBox(50);
         roleout.setAlignment(javafx.geometry.Pos.CENTER);
 
         //javafx.scene.Scene rolScene = new javafx.scene.Scene(roleout,800,600);
