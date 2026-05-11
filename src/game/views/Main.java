@@ -57,6 +57,7 @@ public class Main extends Application {
         Button scarer = new Button("Scarer");
         Button back = new Button("Go back");
         Button instructions = new Button("Instructions");
+        Button backinstructions = new Button("Go back to main menue");
 
 
 
@@ -245,13 +246,14 @@ public class Main extends Application {
         instructionstxt.setStyle("-fx-font-size: 14px;");
         instructionstxt.setMaxWidth(600);
         instructionstxt.setMaxHeight(400);
-        instructionpane.getChildren().addAll(instructionTitle,instructionstxt,back);
+        instructionpane.getChildren().addAll(instructionTitle,instructionstxt,backinstructions);
         BackgroundImage instBackgroundImage = new BackgroundImage(
         new Image("file:Resources/Images/inst.jpg"), 
         BackgroundRepeat.NO_REPEAT, 
         BackgroundRepeat.NO_REPEAT,
         BackgroundPosition.CENTER, 
         bSize
+        
     );
         instructionpane.setBackground( new Background(instBackgroundImage));
 
@@ -259,11 +261,19 @@ public class Main extends Application {
 
 
 
+        backinstructions.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e){
+                stage.getScene().setRoot(layout);;
+            }
+        });
         back.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e){
                 stage.getScene().setRoot(layout);;
             }
         });
+        instructionpane.setAlignment(backinstructions, javafx.geometry.Pos.BOTTOM_LEFT);
+        instructionpane.setMargin(backinstructions, new Insets(20));
+
         back.setOnMouseEntered(e -> back.setText("> Go Back"));
         back.setOnMouseExited(e ->  back.setText("Go Back"));
 
