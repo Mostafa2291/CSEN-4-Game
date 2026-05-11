@@ -39,7 +39,7 @@ public class Main extends Application {
        VBox layout = new VBox(15); // 15px gap between buttons
         layout.setAlignment(javafx.geometry.Pos.CENTER); // Put the menu in the middle
 
-        HBox roleout = new javafx.scene.layout.HBox(50);
+        HBox roleout = new HBox(50);
         roleout.setAlignment(javafx.geometry.Pos.CENTER);
 
         //javafx.scene.Scene rolScene = new javafx.scene.Scene(roleout,800,600);
