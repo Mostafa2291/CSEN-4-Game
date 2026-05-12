@@ -33,6 +33,10 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    private ArrayList<HBox> monsterContainers = new ArrayList<>();
+    private int previousPlayerPos = 0;
+    private int previousOpponentPos = 0;
+
     private static Stage stage;
     private static StackPane menuPane;
     private static Game myGame;
@@ -263,180 +267,118 @@ public class Main extends Application {
         return pane;
     }
 
-    private void startGameBoard(){
+        private int rowColToIndex(int row, int col) {
+        int cols = Constants.BOARD_COLS;
+        
+        // Start by finding the base number for the row (e.g., Row 2 starts at 20)
+        int index = row * cols;
+
+        if (row % 2 == 1) {
+            // Odd rows go right-to-left, so we reverse the column addition
+            index += (cols - 1 - col);
+        } else {
+            // Even rows go left-to-right, so we add the column normally
+            index += col;
+        }
+
+        return index;
+    }
+
+
+
+    private void updateMonsters(){
+
+
+        if (monsterContainers.get(previousPlayerPos) != null) {
+            monsterContainers.get(previousPlayerPos).getChildren().clear();
+        }
+        if (monsterContainers.get(previousOpponentPos) != null) {
+            monsterContainers.get(previousOpponentPos).getChildren().clear();
+        }
+
+        Monster player = myGame.getPlayer();
+        Monster opponent = myGame.getOpponent();
+
+
+        // 2. Draw Player in their new position
+        StackPane playerUI = new StackPane();
+        Rectangle pRect = new Rectangle(20, 20, Color.CYAN); 
+        Label pEnergy = new Label(player.getEnergy() + "");
+        pEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
+        playerUI.getChildren().addAll(pRect, pEnergy);
+        
+        monsterContainers.get(player.getPosition()).getChildren().add(playerUI);
+
+        // 3. Draw Opponent in their new position
+        StackPane opponentUI = new StackPane();
+        Rectangle oRect = new Rectangle(20, 20, Color.MAGENTA); 
+        Label oEnergy = new Label(opponent.getEnergy() + "");
+        oEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
+        opponentUI.getChildren().addAll(oRect, oEnergy);
+        
+        monsterContainers.get(opponent.getPosition()).getChildren().add(opponentUI);
+
+        previousPlayerPos = player.getPosition();
+        previousOpponentPos = opponent.getPosition();
+
+    }
+
+
+   private void startGameBoard() {
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
-        // grid.setHgap(2); // 2 pixels of horizontal space between cells
-        // grid.setVgap(2); // 2 pixels of vertical space between cells
-        // grid.setStyle("-fx-background-color: black; -fx-padding: 2;");
+        
         Board board = myGame.getBoard();
-        Cell [] [] backendGrid = board.getBoardCells();
+        Cell[][] backendGrid = board.getBoardCells();
+
+        // ── PRE-FILL THE ARRAYLIST SO WE DON'T GET OUT OF BOUNDS ERRORS ──
+        monsterContainers.clear(); 
+        for (int i = 0; i < Constants.BOARD_SIZE; i++) {
+            monsterContainers.add(null);
+        }
+
         
-        for(int row = 0 ; row< Constants.BOARD_ROWS ; row++){
-            for(int col = 0; col < Constants.BOARD_COLS ; col++){
-                Cell backendCell = backendGrid[row][col];
 
-                StackPane uiCell = createCell(backendCell);
-                int gridRow = (Constants.BOARD_ROWS -1 ) - row ;
-                grid.add(uiCell, col, gridRow);
-
+        for (int row = 0; row < Constants.BOARD_ROWS; row++) {
+            for (int col = 0; col < Constants.BOARD_COLS; col++) {
                 
+                Cell backendCell = backendGrid[row][col];
+                StackPane uiCell = createCell(backendCell);
+                
+                int index = rowColToIndex(row, col);
 
-               
-            }
-        }
-        
-         int cellNumber = 1;
-
-        for(int rowL = 0; rowL < Constants.BOARD_ROWS; rowL++){
-
-        // determine numbering direction
-        boolean leftToRight = (rowL % 2 == 0);
-
-        if(leftToRight){
-
-            for(int colL = 0; colL < Constants.BOARD_COLS; colL++){
-
-                Cell backendCellL = backendGrid[rowL][colL];
-
-                StackPane uiCellL = createCell(backendCellL);
-
-                // add number label
-                Label numberLabel = new Label(String.valueOf(cellNumber));
-                numberLabel.setStyle("-fx-font-size: 10px;");
+                Label numberLabel = new Label(String.valueOf(index));
+                numberLabel.setStyle("-fx-font-size: 10px; -fx-font-weight: bold;");
                 StackPane.setAlignment(numberLabel, Pos.TOP_LEFT);
-                uiCellL.getChildren().add(numberLabel);
+                uiCell.getChildren().add(numberLabel);
 
-                 //add value of energy to door cells
-                if(backendCellL instanceof DoorCell){ {
-                    Label energyLabel = new Label(String.valueOf(((DoorCell) backendCellL).getEnergy())+" E");
+                if (backendCell instanceof DoorCell) {
+                    Label energyLabel = new Label(((DoorCell) backendCell).getEnergy() + " E");
                     energyLabel.setStyle("-fx-font-size: 10px;");
                     StackPane.setAlignment(energyLabel, Pos.CENTER);
-                    uiCellL.getChildren().add(energyLabel);
+                    uiCell.getChildren().add(energyLabel);
                 }
 
-               
-                 // --- MONSTER VISUALS ---
+                // ── THE OPTIMIZATION: Use .set() to place it in the correct index ──
                 HBox charactersBox = new HBox(5);
                 charactersBox.setAlignment(Pos.BOTTOM_CENTER);
+                monsterContainers.set(index, charactersBox); 
+                uiCell.getChildren().add(charactersBox);
 
-                Monster player = myGame.getPlayer();
-                Monster opponent = myGame.getOpponent();
-
-                if (player.getPosition() == cellNumber - 1) {
-                    StackPane playerUI = new StackPane();
-                    // TODO: Place PNG of player character here
-                    // ImageView playerIcon = new ImageView(new Image("file:Resources/Images/player.png"));
-                    // playerIcon.setFitWidth(20); playerIcon.setFitHeight(20);
-                    // playerUI.getChildren().add(playerIcon);
-                    
-                    Rectangle pRect = new Rectangle(20, 20, Color.CYAN); 
-                    Label pEnergy = new Label(player.getEnergy() + "");
-                    pEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
-                    playerUI.getChildren().addAll(pRect, pEnergy);
-                    charactersBox.getChildren().add(playerUI);
-                }
-
-                if (opponent.getPosition() == cellNumber - 1) {
-                    StackPane opponentUI = new StackPane();
-                    // TODO: Place PNG of opponent character here
-                    // ImageView opponentIcon = new ImageView(new Image("file:Resources/Images/opponent.png"));
-                    // opponentIcon.setFitWidth(20); opponentIcon.setFitHeight(20);
-                    // opponentUI.getChildren().add(opponentIcon);
-
-                    Rectangle oRect = new Rectangle(20, 20, Color.MAGENTA); 
-                    Label oEnergy = new Label(opponent.getEnergy() + "");
-                    oEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
-                    opponentUI.getChildren().addAll(oRect, oEnergy);
-                    charactersBox.getChildren().add(opponentUI);
-                }
-
-                uiCellL.getChildren().add(charactersBox);
-            }
-
-                int gridRowL = (Constants.BOARD_ROWS - 1) - rowL;
-
-                grid.add(uiCellL, colL, gridRowL);
-
-                cellNumber++;
-            }
-
-        } else {
-
-            for(int colL = Constants.BOARD_COLS - 1; colL >= 0; colL--){
-
-                Cell backendCellL = backendGrid[rowL][colL];
-
-                StackPane uiCellL = createCell(backendCellL);
-
-                // add number label
-                Label numberLabel = new Label(String.valueOf(cellNumber));
-                numberLabel.setStyle("-fx-font-size: 10px;");
-                StackPane.setAlignment(numberLabel, Pos.TOP_LEFT);
-                uiCellL.getChildren().add(numberLabel);
-
-                 //add value of energy to door cells
-                if(backendCellL instanceof DoorCell){ {
-                    Label energyLabel = new Label(String.valueOf(((DoorCell) backendCellL).getEnergy())+" E");
-                    energyLabel.setStyle("-fx-font-size: 10px;");
-                    StackPane.setAlignment(energyLabel, Pos.CENTER);
-                    uiCellL.getChildren().add(energyLabel);
-                }
-                 // --- MONSTER VISUALS ---
-                HBox charactersBox = new HBox(5);
-                charactersBox.setAlignment(Pos.BOTTOM_CENTER);
-
-                Monster player = myGame.getPlayer();
-                Monster opponent = myGame.getOpponent();
-
-                if (player.getPosition() == cellNumber - 1) {
-                    StackPane playerUI = new StackPane();
-                    // TODO: Place PNG of player character here
-                    // ImageView playerIcon = new ImageView(new Image("file:Resources/Images/player.png"));
-                    // playerIcon.setFitWidth(20); playerIcon.setFitHeight(20);
-                    // playerUI.getChildren().add(playerIcon);
-                    
-                    Rectangle pRect = new Rectangle(20, 20, Color.CYAN); 
-                    Label pEnergy = new Label(player.getEnergy() + "");
-                    pEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
-                    playerUI.getChildren().addAll(pRect, pEnergy);
-                    charactersBox.getChildren().add(playerUI);
-                }
-
-                if (opponent.getPosition() == cellNumber - 1) {
-                    StackPane opponentUI = new StackPane();
-                    // TODO: Place PNG of opponent character here
-                    // ImageView opponentIcon = new ImageView(new Image("file:Resources/Images/opponent.png"));
-                    // opponentIcon.setFitWidth(20); opponentIcon.setFitHeight(20);
-                    // opponentUI.getChildren().add(opponentIcon);
-
-                    Rectangle oRect = new Rectangle(20, 20, Color.MAGENTA); 
-                    Label oEnergy = new Label(opponent.getEnergy() + "");
-                    oEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
-                    opponentUI.getChildren().addAll(oRect, oEnergy);
-                    charactersBox.getChildren().add(opponentUI);
-                }
-
-                uiCellL.getChildren().add(charactersBox);
-            }
-
-                int gridRowL = (Constants.BOARD_ROWS - 1) - rowL;
-
-                grid.add(uiCellL, colL, gridRowL);
-
-                cellNumber++;
+                int gridRow = (Constants.BOARD_ROWS - 1) - row;
+                grid.add(uiCell, col, gridRow);
             }
         }
-    }
-}
-    
-    
+
+        // ── BUTTON CONTROLS ──
         Button rollDiceBtn = new Button("Roll Dice");
         Button activatePowerUpBtn = new Button("Activate PowerUp!");
 
         rollDiceBtn.setOnAction(e -> {
             try {
                 myGame.playTurn();
+               
+                updateMonsters(); 
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
@@ -445,6 +387,8 @@ public class Main extends Application {
         activatePowerUpBtn.setOnAction(e -> {
             try {
                 myGame.usePowerup();
+                
+                updateMonsters(); 
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
@@ -455,17 +399,16 @@ public class Main extends Application {
         controlsBox.setPadding(new Insets(10));
         controlsBox.getChildren().addAll(rollDiceBtn, activatePowerUpBtn);
 
+        // ── FINAL LAYOUT ──
         BorderPane root = new BorderPane();
         root.setCenter(grid);
         root.setBottom(controlsBox);
 
-        Scene boardScene = new Scene(root, 800,600);//3ashan ashoof el board
+        Scene boardScene = new Scene(root, 800, 600);
         stage.setScene(boardScene);
 
-    
-
-
-
-
+       //call update mosnter for initial starting pos 
+        updateMonsters(); 
+    }
 } 
 
