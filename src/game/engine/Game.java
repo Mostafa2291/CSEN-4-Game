@@ -16,7 +16,18 @@ public class Game {
 	private Monster player;
 	private Monster opponent;
 	private Monster current;
+	private int roll;
+
+	public void setRoll(int roll) {
+		this.roll = roll;
+	}
+
+
+	public int getRoll() {
+		return roll;
+	}
 	
+
 	public Game(Role playerRole) throws IOException {
 		this.board = new Board(DataLoader.readCards());
 		
@@ -87,11 +98,12 @@ public class Game {
 			System.out.println(current.getName() + " is frozen! Turn skipped.");
 			current.setFrozen(false);
 			switchTurn();
+			setRoll(0);
 			return;
 		}
 		
 		int roll = rollDice();
-		
+		setRoll(roll);
 		board.moveMonster(current, roll, getCurrentOpponent());
 		
 		switchTurn();
