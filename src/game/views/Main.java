@@ -328,8 +328,8 @@ public class Main extends Application {
 
         if (currentturnLabel != null) {
             currentturnLabel.setText("Current Turn: " + myGame.getCurrent().getName());
-            playerStatusLabel.setText("Player: " + myGame.getPlayer().getRole() + " | Energy: " + player.getEnergy() + " | position: " + player.getPosition());
-            opponentStatusLabel.setText("Opponent: " + myGame.getOpponent().getRole() + " | Energy: " + opponent.getEnergy() + " | position: " + opponent.getPosition());
+            playerStatusLabel.setText("Player: " + myGame.getPlayer().getName() + " | Energy: " + player.getEnergy() + " | position: " + player.getPosition());
+            opponentStatusLabel.setText("Opponent: " + myGame.getOpponent().getName()+ " | Energy: " + opponent.getEnergy() + " | position: " + opponent.getPosition());
         }
 
     }
@@ -418,8 +418,8 @@ public class Main extends Application {
         VBox statusBox = new VBox(10);
         statusBox.setAlignment(Pos.TOP_LEFT);
         currentturnLabel = new Label("Current Turn: " + myGame.getCurrent().getName());
-        playerStatusLabel = new Label("Player: " + myGame.getPlayer().getRole() + " | Energy: " + myGame.getPlayer().getEnergy() + " | position: " + myGame.getPlayer().getPosition());
-        opponentStatusLabel = new Label("Opponent: " + myGame.getOpponent().getRole() + " | Energy: " + myGame.getOpponent().getEnergy() + " | position: " + myGame.getOpponent().getPosition());
+        playerStatusLabel = new Label("Player: " + myGame.getPlayer().getName() + " | Energy: " + myGame.getPlayer().getEnergy() + " | position: " + myGame.getPlayer().getPosition());
+        opponentStatusLabel = new Label("Opponent: " + myGame.getOpponent().getName() + " | Energy: " + myGame.getOpponent().getEnergy() + " | position: " + myGame.getOpponent().getPosition());
         
         statusBox.getChildren().addAll(currentturnLabel, playerStatusLabel, opponentStatusLabel);
         root.setTop(statusBox);
