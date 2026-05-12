@@ -37,7 +37,7 @@ public class Main extends Application {
     private int previousPlayerPos = 0;
     private int previousOpponentPos = 0;
 
-
+    private Label diceRes;
     private Label currentturnLabel;
     private Label playerStatusLabel;
     private Label opponentStatusLabel;
@@ -328,8 +328,35 @@ public class Main extends Application {
 
         if (currentturnLabel != null) {
             currentturnLabel.setText("Current Turn: " + myGame.getCurrent().getName());
-            playerStatusLabel.setText("Player: " + myGame.getPlayer().getName() + " | Energy: " + player.getEnergy() + " | position: " + player.getPosition());
-            opponentStatusLabel.setText("Opponent: " + myGame.getOpponent().getName()+ " | Energy: " + opponent.getEnergy() + " | position: " + opponent.getPosition());
+
+            
+            // ── Format Player Stats ──
+            String pStats = "Name: " + player.getName() + "\n\n" +
+                            "Original Role: " + player.getOriginalRole() + "\n" +
+                            "Current Role: " + player.getRole() + "\n" +
+                            "Type: " + player.getClass().getSimpleName() + "\n\n" +
+                            "Energy: " + player.getEnergy() + "\n" +
+                            "Position: " + player.getPosition() + "\n\n" +
+                            "Status:\n" + 
+                            "Confusion Turns: " + player.getConfusionTurns() + "\n" + 
+                            "Frozen: " + player.isFrozen() + "\n" +
+                            "Active Shield: " + player.isShielded();
+
+            playerStatusLabel.setText(pStats);
+
+            // ── Format Opponent Stats ──
+            String oStats = "Name: " + opponent.getName() + "\n\n" +
+                            "Original Role: " + opponent.getOriginalRole() + "\n" +
+                            "Current Role: " + opponent.getRole() + "\n" +
+                            "Type: " + opponent.getClass().getSimpleName() + "\n\n" +
+                            "Energy: " + opponent.getEnergy() + "\n" +
+                            "Position: " + opponent.getPosition() + "\n\n" +
+                            "Status:\n" + 
+                            "Confusion Turns: " + opponent.getConfusionTurns() + "\n" + 
+                            "Frozen: " + opponent.isFrozen() + "\n" +
+                            "Active Shield: " + player.isShielded();
+            
+            opponentStatusLabel.setText(oStats);
         }
 
     }
@@ -387,8 +414,12 @@ public class Main extends Application {
 
         rollDiceBtn.setOnAction(e -> {
             try {
+
+                
+
+
                 myGame.playTurn();
-               
+                diceRes.setText("Rolled: " + myGame.getRoll());
                 updateMonsters(); 
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
@@ -415,24 +446,58 @@ public class Main extends Application {
         root.setCenter(grid);
         root.setBottom(controlsBox);
 
-        VBox statusBox = new VBox(10);
-        statusBox.setAlignment(Pos.TOP_LEFT);
-        currentturnLabel = new Label("Current Turn: " + myGame.getCurrent().getName());
-        playerStatusLabel = new Label("Player: " + myGame.getPlayer().getName() + " | Energy: " + myGame.getPlayer().getEnergy() + " | position: " + myGame.getPlayer().getPosition());
-        opponentStatusLabel = new Label("Opponent: " + myGame.getOpponent().getName() + " | Energy: " + myGame.getOpponent().getEnergy() + " | position: " + myGame.getOpponent().getPosition());
+        // 1. Create Left Sidebar for Player
+        VBox leftSidebar = new VBox(10);
+        leftSidebar.setPadding(new Insets(15));
+        leftSidebar.setPrefWidth(180);
+        leftSidebar.setMinWidth(180); // <--- ADD THIS: strictly locks the width
+        leftSidebar.setMaxWidth(180);
+        leftSidebar.setStyle("-fx-background-color: #e0f7fa; -fx-border-color: lightgray; -fx-border-width: 0 1 0 0;");
+        Label pTitle = new Label("🎮 PLAYER");
+        pTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        playerStatusLabel = new Label();
+        playerStatusLabel.setStyle("-fx-font-size: 14px; -fx-line-spacing: 5px;");
+        playerStatusLabel.setWrapText(true);
+        leftSidebar.getChildren().addAll(pTitle, playerStatusLabel);
         
-        statusBox.getChildren().addAll(currentturnLabel, playerStatusLabel, opponentStatusLabel);
-        root.setTop(statusBox);
+        // 2. Create Right Sidebar for Opponent
+        VBox rightSidebar = new VBox(10);
+        rightSidebar.setPadding(new Insets(15));
+        rightSidebar.setPrefWidth(180);
+        rightSidebar.setMinWidth(180); // <--- ADD THIS: strictly locks the width
+        rightSidebar.setMaxWidth(180);
+        rightSidebar.setStyle("-fx-background-color: #fce4ec; -fx-border-color: lightgray; -fx-border-width: 0 0 0 1;");
+        Label oTitle = new Label("👾 OPPONENT");
+        oTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        opponentStatusLabel = new Label();
+        opponentStatusLabel.setStyle("-fx-font-size: 14px; -fx-line-spacing: 5px;");
+        opponentStatusLabel.setWrapText(true);
+        rightSidebar.getChildren().addAll(oTitle, opponentStatusLabel);
 
-        Scene boardScene = new Scene(root, 800,700);//3ashan ashoof el board
+        // 3. Create Top Bar for Turn and Dice Roll
+        VBox topCenterBox = new VBox(5);
+        topCenterBox.setAlignment(Pos.CENTER);
+        topCenterBox.setPadding(new Insets(10));
+        currentturnLabel = new Label("Current Turn: " + myGame.getCurrent().getName());
+        currentturnLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        diceRes = new Label("Rolled: -");
+        diceRes.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: darkred;");
+        topCenterBox.getChildren().addAll(currentturnLabel, diceRes);
+
+        // 4. Attach everything to the BorderPane
+        root.setLeft(leftSidebar);
+        root.setRight(rightSidebar);
+        root.setTop(topCenterBox);
+
+        // INCREASED WIDTH TO 1000 so the sidebars don't squish your board!
+        Scene boardScene = new Scene(root, 1000, 800);
         stage.setScene(boardScene);
 
-       //call update mosnter for initial starting pos 
-        updateMonsters(); 
-    }
+        // Call update monsters for initial starting pos 
+        updateMonsters();
     
         
-
+    }
 
 
 } 
