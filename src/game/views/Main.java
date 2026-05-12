@@ -2,6 +2,7 @@ package game.views;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import game.engine.Board;
 import game.engine.Constants;
@@ -13,6 +14,7 @@ import game.engine.cells.ContaminationSock;
 import game.engine.cells.ConveyorBelt;
 import game.engine.cells.DoorCell;
 import game.engine.cells.MonsterCell;
+import game.engine.monsters.Monster;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -61,7 +63,7 @@ public class Main extends Application {
         controls.setPadding(new Insets(10));
         instructions.setPadding(new Insets(10));
         back.setPadding(new Insets(10, 20, 10, 20));
-        backInstructions.setPadding(new Insets(10, 20, 10, 20));
+        backInstructions.setPadding(new Insets(10, 20, 10, 20));     
 
         // ── Main Menu ─────────────────────────────────────────────────────────
         VBox layout = new VBox(15);
@@ -220,15 +222,15 @@ public class Main extends Application {
             }
         } );
 
-
-
-
-        //game functionality >.<
         
+
+
+        //game functionality >.<      
+
+
        
-
-
-      
+    
+            
 
        
 
@@ -236,7 +238,7 @@ public class Main extends Application {
      private StackPane createCell(Cell modelCell){
 
         StackPane pane = new StackPane();
-        Rectangle bg = new Rectangle(60,60);
+        Rectangle bg = new Rectangle(60,60);      
 
         bg.setStroke(Color.BLACK);
         if(modelCell instanceof MonsterCell){
@@ -269,7 +271,7 @@ public class Main extends Application {
         // grid.setStyle("-fx-background-color: black; -fx-padding: 2;");
         Board board = myGame.getBoard();
         Cell [] [] backendGrid = board.getBoardCells();
-
+        
         for(int row = 0 ; row< Constants.BOARD_ROWS ; row++){
             for(int col = 0; col < Constants.BOARD_COLS ; col++){
                 Cell backendCell = backendGrid[row][col];
@@ -312,6 +314,44 @@ public class Main extends Application {
                     StackPane.setAlignment(energyLabel, Pos.CENTER);
                     uiCellL.getChildren().add(energyLabel);
                 }
+
+               
+                 // --- MONSTER VISUALS ---
+                HBox charactersBox = new HBox(5);
+                charactersBox.setAlignment(Pos.BOTTOM_CENTER);
+
+                Monster player = myGame.getPlayer();
+                Monster opponent = myGame.getOpponent();
+
+                if (player.getPosition() == cellNumber - 1) {
+                    StackPane playerUI = new StackPane();
+                    // TODO: Place PNG of player character here
+                    // ImageView playerIcon = new ImageView(new Image("file:Resources/Images/player.png"));
+                    // playerIcon.setFitWidth(20); playerIcon.setFitHeight(20);
+                    // playerUI.getChildren().add(playerIcon);
+                    
+                    Rectangle pRect = new Rectangle(20, 20, Color.CYAN); 
+                    Label pEnergy = new Label(player.getEnergy() + "");
+                    pEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
+                    playerUI.getChildren().addAll(pRect, pEnergy);
+                    charactersBox.getChildren().add(playerUI);
+                }
+
+                if (opponent.getPosition() == cellNumber - 1) {
+                    StackPane opponentUI = new StackPane();
+                    // TODO: Place PNG of opponent character here
+                    // ImageView opponentIcon = new ImageView(new Image("file:Resources/Images/opponent.png"));
+                    // opponentIcon.setFitWidth(20); opponentIcon.setFitHeight(20);
+                    // opponentUI.getChildren().add(opponentIcon);
+
+                    Rectangle oRect = new Rectangle(20, 20, Color.MAGENTA); 
+                    Label oEnergy = new Label(opponent.getEnergy() + "");
+                    oEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
+                    opponentUI.getChildren().addAll(oRect, oEnergy);
+                    charactersBox.getChildren().add(opponentUI);
+                }
+
+                uiCellL.getChildren().add(charactersBox);
             }
 
                 int gridRowL = (Constants.BOARD_ROWS - 1) - rowL;
@@ -342,6 +382,42 @@ public class Main extends Application {
                     StackPane.setAlignment(energyLabel, Pos.CENTER);
                     uiCellL.getChildren().add(energyLabel);
                 }
+                 // --- MONSTER VISUALS ---
+                HBox charactersBox = new HBox(5);
+                charactersBox.setAlignment(Pos.BOTTOM_CENTER);
+
+                Monster player = myGame.getPlayer();
+                Monster opponent = myGame.getOpponent();
+
+                if (player.getPosition() == cellNumber - 1) {
+                    StackPane playerUI = new StackPane();
+                    // TODO: Place PNG of player character here
+                    // ImageView playerIcon = new ImageView(new Image("file:Resources/Images/player.png"));
+                    // playerIcon.setFitWidth(20); playerIcon.setFitHeight(20);
+                    // playerUI.getChildren().add(playerIcon);
+                    
+                    Rectangle pRect = new Rectangle(20, 20, Color.CYAN); 
+                    Label pEnergy = new Label(player.getEnergy() + "");
+                    pEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
+                    playerUI.getChildren().addAll(pRect, pEnergy);
+                    charactersBox.getChildren().add(playerUI);
+                }
+
+                if (opponent.getPosition() == cellNumber - 1) {
+                    StackPane opponentUI = new StackPane();
+                    // TODO: Place PNG of opponent character here
+                    // ImageView opponentIcon = new ImageView(new Image("file:Resources/Images/opponent.png"));
+                    // opponentIcon.setFitWidth(20); opponentIcon.setFitHeight(20);
+                    // opponentUI.getChildren().add(opponentIcon);
+
+                    Rectangle oRect = new Rectangle(20, 20, Color.MAGENTA); 
+                    Label oEnergy = new Label(opponent.getEnergy() + "");
+                    oEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
+                    opponentUI.getChildren().addAll(oRect, oEnergy);
+                    charactersBox.getChildren().add(opponentUI);
+                }
+
+                uiCellL.getChildren().add(charactersBox);
             }
 
                 int gridRowL = (Constants.BOARD_ROWS - 1) - rowL;
@@ -352,6 +428,7 @@ public class Main extends Application {
             }
         }
     }
+    
         Scene boardScene = new Scene(grid, 800,600);//3ashan ashoof el board
         stage.setScene(boardScene);
 
