@@ -459,11 +459,19 @@ public class Main extends Application {
         root.setCenter(grid);
         root.setBottom(controlsBox);
 
+        VBox statusBox = new VBox(10);
+        statusBox.setAlignment(Pos.TOP_LEFT);
+        Label currentturn = new Label("Current Turn: " + myGame.getCurrent());
+        Label playerStatus = new Label("Player: " + myGame.getPlayer().getRole() + " | Energy: " + myGame.getPlayer().getEnergy() + " | position: " + myGame.getPlayer().getPosition());
+        Label opponentStatus = new Label("Opponent: " + myGame.getOpponent().getRole() + " | Energy: " + myGame.getOpponent().getEnergy() + " | position: " + myGame.getOpponent().getPosition());
+        statusBox.getChildren().addAll(currentturn, playerStatus, opponentStatus);
+        root.setTop(statusBox);
+
         Scene boardScene = new Scene(root, 800,600);//3ashan ashoof el board
         stage.setScene(boardScene);
 
     
-
+        
 
 
 
