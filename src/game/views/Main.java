@@ -428,11 +428,44 @@ public class Main extends Application {
             }
         }
     }
+}
     
-        Scene boardScene = new Scene(grid, 800,600);//3ashan ashoof el board
+    
+        Button rollDiceBtn = new Button("Roll Dice");
+        Button activatePowerUpBtn = new Button("Activate PowerUp!");
+
+        rollDiceBtn.setOnAction(e -> {
+            try {
+                myGame.playTurn();
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+        });
+
+        activatePowerUpBtn.setOnAction(e -> {
+            try {
+                myGame.usePowerup();
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+        });
+
+        HBox controlsBox = new HBox(20);
+        controlsBox.setAlignment(Pos.CENTER);
+        controlsBox.setPadding(new Insets(10));
+        controlsBox.getChildren().addAll(rollDiceBtn, activatePowerUpBtn);
+
+        BorderPane root = new BorderPane();
+        root.setCenter(grid);
+        root.setBottom(controlsBox);
+
+        Scene boardScene = new Scene(root, 800,600);//3ashan ashoof el board
         stage.setScene(boardScene);
 
-    }
+    
 
 
-}
+
+
+} 
+
