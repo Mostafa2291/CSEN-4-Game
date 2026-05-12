@@ -37,6 +37,11 @@ public class Main extends Application {
     private int previousPlayerPos = 0;
     private int previousOpponentPos = 0;
 
+
+    private Label currentturnLabel;
+    private Label playerStatusLabel;
+    private Label opponentStatusLabel;
+
     private static Stage stage;
     private static StackPane menuPane;
     private static Game myGame;
@@ -321,6 +326,12 @@ public class Main extends Application {
         previousPlayerPos = player.getPosition();
         previousOpponentPos = opponent.getPosition();
 
+        if (currentturnLabel != null) {
+            currentturnLabel.setText("Current Turn: " + myGame.getCurrent().getName());
+            playerStatusLabel.setText("Player: " + myGame.getPlayer().getRole() + " | Energy: " + player.getEnergy() + " | position: " + player.getPosition());
+            opponentStatusLabel.setText("Opponent: " + myGame.getOpponent().getRole() + " | Energy: " + opponent.getEnergy() + " | position: " + opponent.getPosition());
+        }
+
     }
 
 
@@ -404,11 +415,25 @@ public class Main extends Application {
         root.setCenter(grid);
         root.setBottom(controlsBox);
 
-        Scene boardScene = new Scene(root, 800, 600);
+        VBox statusBox = new VBox(10);
+        statusBox.setAlignment(Pos.TOP_LEFT);
+        currentturnLabel = new Label("Current Turn: " + myGame.getCurrent().getName());
+        playerStatusLabel = new Label("Player: " + myGame.getPlayer().getRole() + " | Energy: " + myGame.getPlayer().getEnergy() + " | position: " + myGame.getPlayer().getPosition());
+        opponentStatusLabel = new Label("Opponent: " + myGame.getOpponent().getRole() + " | Energy: " + myGame.getOpponent().getEnergy() + " | position: " + myGame.getOpponent().getPosition());
+        
+        statusBox.getChildren().addAll(currentturnLabel, playerStatusLabel, opponentStatusLabel);
+        root.setTop(statusBox);
+
+        Scene boardScene = new Scene(root, 800,700);//3ashan ashoof el board
         stage.setScene(boardScene);
 
        //call update mosnter for initial starting pos 
         updateMonsters(); 
     }
+    
+        
+
+
+
 } 
 
