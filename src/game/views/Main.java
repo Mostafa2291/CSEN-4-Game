@@ -11,6 +11,7 @@ import game.engine.cells.CardCell;
 import game.engine.cells.Cell;
 import game.engine.cells.ContaminationSock;
 import game.engine.cells.ConveyorBelt;
+import game.engine.cells.DoorCell;
 import game.engine.cells.MonsterCell;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -174,7 +175,7 @@ public class Main extends Application {
         instructionPane.getChildren().addAll(instructionTitle, instructionsTxt, backInstructions);
 
         // ── Scene ─────────────────────────────────────────────────────────────
-        Scene scene = new Scene(layout, 800, 800);
+        Scene scene = new Scene(layout, 800, 600);//3andy (yassin) law h=800 beteb2a out of bounds msh bashoof haga
         stage.setTitle("DooR DasH: Scare vs Laugh");
         stage.setScene(scene);
         stage.show();
@@ -252,7 +253,8 @@ public class Main extends Application {
             bg.setFill(Color.ORANGE);
         }
         else
-            bg.setFill(Color.YELLOW);
+            bg.setFill(Color.PAPAYAWHIP);//el lon da esmo helw
+            
 
         pane.getChildren().add(bg);
 
@@ -275,11 +277,85 @@ public class Main extends Application {
                 StackPane uiCell = createCell(backendCell);
                 int gridRow = (Constants.BOARD_ROWS -1 ) - row ;
                 grid.add(uiCell, col, gridRow);
+
+                
+
+               
             }
         }
-        Scene boardScene = new Scene(grid, 800,800);
+        
+         int cellNumber = 1;
+
+        for(int rowL = 0; rowL < Constants.BOARD_ROWS; rowL++){
+
+        // determine numbering direction
+        boolean leftToRight = (rowL % 2 == 0);
+
+        if(leftToRight){
+
+            for(int colL = 0; colL < Constants.BOARD_COLS; colL++){
+
+                Cell backendCellL = backendGrid[rowL][colL];
+
+                StackPane uiCellL = createCell(backendCellL);
+
+                // add number label
+                Label numberLabel = new Label(String.valueOf(cellNumber));
+                numberLabel.setStyle("-fx-font-size: 10px;");
+                StackPane.setAlignment(numberLabel, Pos.TOP_LEFT);
+                uiCellL.getChildren().add(numberLabel);
+
+                 //add value of energy to door cells
+                if(backendCellL instanceof DoorCell){ {
+                    Label energyLabel = new Label(String.valueOf(((DoorCell) backendCellL).getEnergy())+" E");
+                    energyLabel.setStyle("-fx-font-size: 10px;");
+                    StackPane.setAlignment(energyLabel, Pos.CENTER);
+                    uiCellL.getChildren().add(energyLabel);
+                }
+            }
+
+                int gridRowL = (Constants.BOARD_ROWS - 1) - rowL;
+
+                grid.add(uiCellL, colL, gridRowL);
+
+                cellNumber++;
+            }
+
+        } else {
+
+            for(int colL = Constants.BOARD_COLS - 1; colL >= 0; colL--){
+
+                Cell backendCellL = backendGrid[rowL][colL];
+
+                StackPane uiCellL = createCell(backendCellL);
+
+                // add number label
+                Label numberLabel = new Label(String.valueOf(cellNumber));
+                numberLabel.setStyle("-fx-font-size: 10px;");
+                StackPane.setAlignment(numberLabel, Pos.TOP_LEFT);
+                uiCellL.getChildren().add(numberLabel);
+
+                 //add value of energy to door cells
+                if(backendCellL instanceof DoorCell){ {
+                    Label energyLabel = new Label(String.valueOf(((DoorCell) backendCellL).getEnergy())+" E");
+                    energyLabel.setStyle("-fx-font-size: 10px;");
+                    StackPane.setAlignment(energyLabel, Pos.CENTER);
+                    uiCellL.getChildren().add(energyLabel);
+                }
+            }
+
+                int gridRowL = (Constants.BOARD_ROWS - 1) - rowL;
+
+                grid.add(uiCellL, colL, gridRowL);
+
+                cellNumber++;
+            }
+        }
+    }
+        Scene boardScene = new Scene(grid, 800,600);//3ashan ashoof el board
         stage.setScene(boardScene);
 
     }
+
 
 }
