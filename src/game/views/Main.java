@@ -21,9 +21,11 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import game.engine.cards.Card;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -414,13 +416,29 @@ public class Main extends Application {
 
         rollDiceBtn.setOnAction(e -> {
             try {
-
-                
-
+                if (Board.getCards().isEmpty()) {
+                    Board.reloadCards();
+                }
+                Card topCardBeforeTurn = Board.getCards().get(0);
+                int sizeBefore = Board.getCards().size();
 
                 myGame.playTurn();
                 diceRes.setText("Rolled: " + myGame.getRoll());
                 updateMonsters(); 
+
+                if (myGame.getRoll() == 0) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Turn Skipped");
+                    alert.setHeaderText("Freeze Effect!");
+                    alert.setContentText("The player was frozen and skipped their turn.");
+                    alert.showAndWait();
+                } else if (Board.getCards().size() < sizeBefore) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Card Drawn");
+                    alert.setHeaderText("You drew: " + topCardBeforeTurn.getName());
+                    alert.setContentText("Effect: " + topCardBeforeTurn.getDescription());
+                    alert.showAndWait();
+                }
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
