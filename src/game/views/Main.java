@@ -427,8 +427,9 @@ public class Main extends Application {
                 }
                 Card topCardBeforeTurn = Board.getCards().get(0);
                 int sizeBefore = Board.getCards().size();
-
+                // Check for roll of 0 and if player is frozen or landed on opponent
                  if (myGame.getRoll() == 0) {
+                    // Check if player is frozen
                     if(myGame.getCurrent().isFrozen()) {
                     myGame.getCurrent().setFrozen(false); // Unfreeze the player for the next turn
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -436,6 +437,7 @@ public class Main extends Application {
                     alert.setHeaderText("Freeze Effect!");
                     alert.setContentText("The player was frozen and skipped their turn.");
                     alert.showAndWait();}
+                    //landed on opponent alert
                     else if(myGame.getPlayer().getPosition() == myGame.getOpponent().getPosition()){ 
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Turn Skipped");
@@ -444,6 +446,7 @@ public class Main extends Application {
                         alert.showAndWait();
                     
                     }
+                    //drawing card alert
                 } else if (Board.getCards().size() < sizeBefore) {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Card Drawn");
