@@ -251,17 +251,17 @@ public class Main extends Application {
 
         bg.setStroke(Color.BLACK);
         if(modelCell instanceof MonsterCell){
-            bg.setFill(Color.BLUE);
+            bg.setFill(Color.LIGHTCORAL);
 
         }
         else if(modelCell instanceof CardCell){
-            bg.setFill(Color.RED);
+            bg.setFill(Color.AQUAMARINE);
         }
         else if(modelCell instanceof ConveyorBelt){
-            bg.setFill(Color.GREEN);
+            bg.setFill(Color.MAGENTA);
         }
         else if (modelCell instanceof ContaminationSock){
-            bg.setFill(Color.ORANGE);
+            bg.setFill(Color.DARKORCHID);
         }
         else
             bg.setFill(Color.PAPAYAWHIP);//el lon da esmo helw
@@ -307,7 +307,7 @@ public class Main extends Application {
 
         // 2. Draw Player in their new position
         StackPane playerUI = new StackPane();
-        Rectangle pRect = new Rectangle(20, 20, Color.CYAN); 
+        Rectangle pRect = new Rectangle(20, 20, Color.BLUEVIOLET); 
         Label pEnergy = new Label(player.getEnergy() + "");
         pEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
         playerUI.getChildren().addAll(pRect, pEnergy);
