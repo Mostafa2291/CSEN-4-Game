@@ -419,6 +419,9 @@ public class Main extends Application {
                 myGame.playTurn();
                 diceRes.setText("Rolled: " + myGame.getRoll());
                 updateMonsters(); 
+             } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
                   if (Board.getCards().isEmpty()) {
                     Board.reloadCards();
                 }
@@ -449,9 +452,7 @@ public class Main extends Application {
                     alert.showAndWait();
                 }
                 
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage());
-            }
+           
             
         });
 
