@@ -8,6 +8,7 @@ import game.engine.Board;
 import game.engine.Constants;
 import game.engine.Game;
 import game.engine.Role;
+import game.engine.cards.Card;
 import game.engine.cells.CardCell;
 import game.engine.cells.Cell;
 import game.engine.cells.ContaminationSock;
@@ -25,7 +26,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import game.engine.cards.Card;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -356,7 +356,7 @@ public class Main extends Application {
                             "Status:\n" + 
                             "Confusion Turns: " + opponent.getConfusionTurns() + "\n" + 
                             "Frozen: " + opponent.isFrozen() + "\n" +
-                            "Active Shield: " + player.isShielded();
+                            "Active Shield: " + opponent.isShielded();
             
             opponentStatusLabel.setText(oStats);
         }
@@ -416,22 +416,31 @@ public class Main extends Application {
 
         rollDiceBtn.setOnAction(e -> {
             try {
-                if (Board.getCards().isEmpty()) {
+                myGame.playTurn();
+                diceRes.setText("Rolled: " + myGame.getRoll());
+                updateMonsters(); 
+                  if (Board.getCards().isEmpty()) {
                     Board.reloadCards();
                 }
                 Card topCardBeforeTurn = Board.getCards().get(0);
                 int sizeBefore = Board.getCards().size();
 
-                myGame.playTurn();
-                diceRes.setText("Rolled: " + myGame.getRoll());
-                updateMonsters(); 
-
-                if (myGame.getRoll() == 0) {
+                 if (myGame.getRoll() == 0) {
+                    if(myGame.getCurrent().isFrozen()) {
+                    myGame.getCurrent().setFrozen(false); // Unfreeze the player for the next turn
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Turn Skipped");
                     alert.setHeaderText("Freeze Effect!");
                     alert.setContentText("The player was frozen and skipped their turn.");
-                    alert.showAndWait();
+                    alert.showAndWait();}
+                    else if(myGame.getPlayer().getPosition() == myGame.getOpponent().getPosition()){ 
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Turn Skipped");
+                        alert.setHeaderText("Landed on opponent!");
+                        alert.setContentText("You rolled a 0 and cannot move this turn.");
+                        alert.showAndWait();
+                    
+                    }
                 } else if (Board.getCards().size() < sizeBefore) {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Card Drawn");
@@ -439,9 +448,11 @@ public class Main extends Application {
                     alert.setContentText("Effect: " + topCardBeforeTurn.getDescription());
                     alert.showAndWait();
                 }
+                
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
             }
+            
         });
 
         activatePowerUpBtn.setOnAction(e -> {
