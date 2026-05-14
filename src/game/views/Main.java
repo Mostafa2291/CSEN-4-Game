@@ -247,29 +247,32 @@ public class Main extends Application {
 
     }
      private StackPane createCell(Cell modelCell){
-
         StackPane pane = new StackPane();
-        Rectangle bg = new Rectangle(60,60);      
+        
+        // Use a CSS color string instead of a fixed Rectangle shape
+        String cssColor;
 
-        bg.setStroke(Color.BLACK);
         if(modelCell instanceof MonsterCell){
-            bg.setFill(Color.LIGHTCORAL);
-
+            cssColor = "lightcoral";
         }
         else if(modelCell instanceof CardCell){
-            bg.setFill(Color.AQUAMARINE);
+            cssColor = "aquamarine";
         }
         else if(modelCell instanceof ConveyorBelt){
-            bg.setFill(Color.MAGENTA);
+            cssColor = "magenta";
         }
         else if (modelCell instanceof ContaminationSock){
-            bg.setFill(Color.DARKORCHID);
+            cssColor = "darkorchid";
         }
-        else
-            bg.setFill(Color.PAPAYAWHIP);//el lon da esmo helw
-            
+        else {
+            cssColor = "papayawhip"; // el lon da esmo helw
+        }
 
-        pane.getChildren().add(bg);
+        // Apply the background color and a crisp black border directly to the pane
+        pane.setStyle("-fx-background-color: " + cssColor + "; -fx-border-color: black; -fx-border-width: 0.5px;");
+        
+        // Give it a preferred starting size, but allow it to stretch dynamically
+        pane.setPrefSize(60, 60);
 
         return pane;
     }
