@@ -330,7 +330,7 @@ public class Main extends Application {
             ImageView playeri = new ImageView(new Image("file:Resources/Images/Fungus.jpg"));
             pImage.setFill(new ImagePattern(playeri.getImage()));
         }
-         else if(myGame.getPlayer().getName().equals("Henry J.Waternoose")){
+         else if(myGame.getPlayer().getName().equals("Henry J. Waternoose")){
              pRect.setFill(Color.WHITE);
             ImageView playeri = new ImageView(new Image("file:Resources/Images/Henry J.Waternoose.jpg"));
             pImage.setFill(new ImagePattern(playeri.getImage()));
@@ -413,7 +413,7 @@ public class Main extends Application {
             ImageView opponenti = new ImageView(new Image("file:Resources/Images/Fungus.jpg"));
             oImage.setFill(new ImagePattern(opponenti.getImage()));
         }
-         else if(myGame.getOpponent().getName().equals("Henry J.Waternoose")){
+         else if(myGame.getOpponent().getName().equals("Henry J. Waternoose")){
              oRect.setFill(Color.WHITE);
             ImageView opponenti = new ImageView(new Image("file:Resources/Images/Henry J.Waternoose.jpg"));
             oImage.setFill(new ImagePattern(opponenti.getImage()));
@@ -456,6 +456,24 @@ public class Main extends Application {
    private void startGameBoard() {
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
+        ArrayList<String> availableImages = new ArrayList<>();
+        availableImages.add("file:Resources/Images/Roz.jpg");
+        availableImages.add("file:Resources/Images/Fungus.jpg");
+        availableImages.add("file:Resources/Images/Henry J.Waternoose.jpg");
+        availableImages.add("file:Resources/Images/Yeti.jpg");
+        availableImages.add("file:Resources/Images/Mike Wazowski.jpg");
+        availableImages.add("file:Resources/Images/James p.Sullivan.jpg");
+        availableImages.add("file:Resources/Images/Randall Boggs.jpg");
+        availableImages.add("file:Resources/Images/Celia Mae.jpg");
+        
+        String pName = myGame.getPlayer().getName();
+        String oName = myGame.getOpponent().getName();
+        String pFile = pName.equals("James P. Sullivan") ? "James p.sullivan" : 
+                       (pName.equals("Henry J. Waternoose") ? "Henry J.Waternoose" : pName);
+        String oFile = oName.equals("James P. Sullivan") ? "James p.sullivan" : 
+                       (oName.equals("Henry J. Waternoose") ? "Henry J.Waternoose" : oName);
+        availableImages.remove("file:Resources/Images/" + pFile + ".jpg");
+        availableImages.remove("file:Resources/Images/" + oFile + ".jpg");
         
         // ── RESPONSIVE FIX: Apply percentage constraints to the Grid! ──
         for (int i = 0; i < Constants.BOARD_COLS; i++) {
@@ -491,12 +509,17 @@ public class Main extends Application {
                 uiCell.getChildren().add(numberLabel);
 
                 if(backendCell instanceof MonsterCell){
-                    ImageView monsterImage = new ImageView(new Image("file:Resources/Images/Mon.jpg"));
-                    monsterImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.6));
-                    monsterImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.6));
-                    uiCell.getChildren().add(monsterImage);
-                    uiCell.setAlignment(monsterImage,Pos.CENTER);
-                }
+                            Random rand = new Random();
+                            String chosenPath = availableImages.get(rand.nextInt(availableImages.size()));
+                            Image chosen = new Image(chosenPath);
+                            ImageView monsterImage = new ImageView(chosen);
+                            monsterImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.6));
+                            monsterImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.6));
+                            uiCell.getChildren().add(monsterImage);
+                            uiCell.setAlignment(monsterImage, Pos.CENTER);
+                            availableImages.remove(chosenPath);
+                        }
+                
 
                 if(backendCell instanceof CardCell){
                     ImageView cardImage = new ImageView(new Image("file:Resources/Images/Card.jpg"));
@@ -533,6 +556,7 @@ public class Main extends Application {
                         uiCell.setAlignment(closedDoorImage,Pos.BOTTOM_RIGHT);
                 
                 }
+            
 
                 HBox charactersBox = new HBox(5);
                 charactersBox.setAlignment(Pos.BOTTOM_CENTER);
@@ -555,13 +579,14 @@ public class Main extends Application {
                 Monster activeMonster = myGame.getCurrent();
                 Boolean hadShield = activeMonster.isShielded();
                 int initialE = activeMonster.getEnergy();
+                
+                
                  
                
                 myGame.playTurn();
                 diceRes.setText("Rolled: " + myGame.getRoll());
 
-      
-               
+ 
                 if(activeMonster.getPosition() == Constants.WINNING_POSITION && activeMonster.getEnergy()>= Constants.WINNING_ENERGY){
                     ButtonType mainMenu= new ButtonType("Main Menu");
                     ButtonType gameQuit = new ButtonType("Quit game :-( ");
