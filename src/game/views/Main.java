@@ -492,6 +492,39 @@ public class Main extends Application {
             }
         });
 
+// ── CUSTOM PAUSE MENU OVERLAY ──
+        VBox pauseOverlay = new VBox();
+        pauseOverlay.setAlignment(Pos.CENTER);
+        pauseOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.6);"); 
+        pauseOverlay.setVisible(false); 
+
+        VBox pauseMenuBox = new VBox(20);
+        pauseMenuBox.setAlignment(Pos.CENTER);
+        pauseMenuBox.setMaxSize(300, 250); 
+        pauseMenuBox.setStyle("-fx-background-color: white; -fx-padding: 30px; -fx-border-color: #333; -fx-border-width: 3px; -fx-background-radius: 10px; -fx-border-radius: 10px;");
+
+        Label pauseTitle = new Label("GAME PAUSED");
+        pauseTitle.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+        Button resumeBtn = new Button("Resume Game");
+        Button quitToMenuBtn = new Button("Quit to Main Menu");
+        resumeBtn.setPrefWidth(150);
+        quitToMenuBtn.setPrefWidth(150);
+
+        pauseMenuBox.getChildren().addAll(pauseTitle, resumeBtn, quitToMenuBtn);
+        pauseOverlay.getChildren().add(pauseMenuBox);
+
+        resumeBtn.setOnAction(e -> pauseOverlay.setVisible(false)); 
+        quitToMenuBtn.setOnAction(e -> {
+            pauseOverlay.setVisible(false); 
+            mainMenuScene.setRoot(layout);
+            stage.setScene(mainMenuScene);
+        });
+
+
+
+
+
         HBox controlsBox = new HBox(20);
         controlsBox.setAlignment(Pos.CENTER);
         controlsBox.setPadding(new Insets(10));
@@ -542,8 +575,9 @@ public class Main extends Application {
         root.setLeft(leftSidebar);
         root.setRight(rightSidebar);
         root.setTop(topCenterBox);
-
-        Scene boardScene = new Scene(root, 1000, 800);
+        StackPane basePane = new StackPane();
+        basePane.getChildren().addAll(root,pauseOverlay);
+        Scene boardScene = new Scene(basePane, 1000, 800);
         stage.setScene(boardScene);
 
         // ── CHEAT CODES ──
@@ -587,7 +621,7 @@ public class Main extends Application {
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
                     gameAlert.setHeaderText(activeMonster.getName() + " Won the game!!! ");
-                    gameAlert.getButtonTypes().setAll(gameQuit, mainMenu);
+                    gameAlert.getButtonTypes().setAll( mainMenu,gameQuit);
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
@@ -601,6 +635,11 @@ public class Main extends Application {
                     }
                 }
             }
+            else if (event.getCode() == KeyCode.ESCAPE){
+                pauseOverlay.setVisible(!pauseOverlay.isVisible());
+
+            }
+           
         });
 
         // Call update monsters for initial starting pos 
