@@ -489,6 +489,13 @@ public class Main extends Application {
                 numberLabel.setStyle("-fx-font-size: 10px; -fx-font-weight: bold;");
                 StackPane.setAlignment(numberLabel, Pos.TOP_LEFT);
                 uiCell.getChildren().add(numberLabel);
+                if(backendCell instanceof ConveyorBelt){
+                    ImageView conveyorImage = new ImageView(new Image("file:Resources/Images/Conveyer.jpg"));
+                    conveyorImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.3));
+                    conveyorImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.3));
+                    uiCell.getChildren().add(conveyorImage);
+                    uiCell.setAlignment(conveyorImage,Pos.BOTTOM_RIGHT);
+                }
 
                 if (backendCell instanceof DoorCell) {
                     Label energyLabel = new Label(((DoorCell) backendCell).getEnergy() + " E");
