@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Arrays;
+import java.util.Optional;
+
+import javafx.scene.input.KeyCode;
 import game.engine.Board;
 import game.engine.Constants;
 import game.engine.Game;
@@ -16,21 +19,22 @@ import game.engine.cells.ConveyorBelt;
 import game.engine.cells.DoorCell;
 import game.engine.cells.MonsterCell;
 import game.engine.exceptions.InvalidMoveException;
+import game.engine.exceptions.OutOfEnergyException;
 import game.engine.monsters.Monster;
+
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.*; // Imports ColumnConstraints and RowConstraints automatically!
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -45,10 +49,11 @@ public class Main extends Application {
     private Label currentturnLabel;
     private Label playerStatusLabel;
     private Label opponentStatusLabel;
-
+    private Scene mainMenuScene;
+    private VBox layout;
     private static Stage stage;
-    private static StackPane menuPane;
     private static Game myGame;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -76,10 +81,10 @@ public class Main extends Application {
         controls.setPadding(new Insets(10));
         instructions.setPadding(new Insets(10));
         back.setPadding(new Insets(10, 20, 10, 20));
-        backInstructions.setPadding(new Insets(10, 20, 10, 20));     
+        backInstructions.setPadding(new Insets(10, 20, 10, 20));
 
         // ── Main Menu ─────────────────────────────────────────────────────────
-        VBox layout = new VBox(15);
+        layout = new VBox(15);
         layout.setAlignment(Pos.CENTER);
         layout.getChildren().addAll(start, controls, instructions, quit);
 
@@ -123,7 +128,6 @@ public class Main extends Application {
 
         // ── Instructions Screen ───────────────────────────────────────────────
         StackPane instructionPane = new StackPane();
-
         Label instructionTitle = new Label("GAME INSTRUCTIONS");
         instructionTitle.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         StackPane.setAlignment(instructionTitle, Pos.TOP_CENTER);
@@ -190,9 +194,9 @@ public class Main extends Application {
         instructionPane.getChildren().addAll(instructionTitle, instructionsTxt, backInstructions);
 
         // ── Scene ─────────────────────────────────────────────────────────────
-        Scene scene = new Scene(layout, 800, 600);//3andy (yassin) law h=800 beteb2a out of bounds msh bashoof haga
+        mainMenuScene = new Scene(layout, 800, 600);
         stage.setTitle("DooR DasH: Scare vs Laugh");
-        stage.setScene(scene);
+        stage.setScene(mainMenuScene);
         stage.show();
 
         // ── Button Actions ────────────────────────────────────────────────────
@@ -209,7 +213,6 @@ public class Main extends Application {
         back.setOnMouseExited(e  -> back.setText("Go Back"));
 
         backInstructions.setOnAction(e -> stage.getScene().setRoot(layout));
-
         quit.setOnAction(e -> stage.close());
         quit.setOnMouseEntered(e -> quit.setText("> Quit :("));
         quit.setOnMouseExited(e  -> quit.setText("Quit"));
@@ -224,7 +227,6 @@ public class Main extends Application {
             }
         } );
 
-
         scarer.setOnAction(e ->{
              try{
                 myGame = new Game(Role.SCARER);
@@ -235,25 +237,12 @@ public class Main extends Application {
             }
         } );
 
-        
-
-
-        //game functionality >.<      
-
-
-       
-    
-            
-
-       
-
     }
-     private StackPane createCell(Cell modelCell){
+
+    private StackPane createCell(Cell modelCell){
         StackPane pane = new StackPane();
         
-        // Use a CSS color string instead of a fixed Rectangle shape
         String cssColor;
-
         if(modelCell instanceof MonsterCell){
             cssColor = "lightcoral";
         }
@@ -267,39 +256,28 @@ public class Main extends Application {
             cssColor = "darkorchid";
         }
         else {
-            cssColor = "papayawhip"; // el lon da esmo helw
+            cssColor = "papayawhip";
         }
 
-        // Apply the background color and a crisp black border directly to the pane
         pane.setStyle("-fx-background-color: " + cssColor + "; -fx-border-color: black; -fx-border-width: 0.5px;");
         
-        // Give it a preferred starting size, but allow it to stretch dynamically
-        pane.setPrefSize(60, 60);
-
+        // ── RESPONSIVE FIX: Allow the pane to grow indefinitely instead of setting a fixed 60x60 ──
+        pane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         return pane;
     }
 
-        private int rowColToIndex(int row, int col) {
+    private int rowColToIndex(int row, int col) {
         int cols = Constants.BOARD_COLS;
-        
-        // Start by finding the base number for the row (e.g., Row 2 starts at 20)
         int index = row * cols;
-
         if (row % 2 == 1) {
-            // Odd rows go right-to-left, so we reverse the column addition
             index += (cols - 1 - col);
         } else {
-            // Even rows go left-to-right, so we add the column normally
             index += col;
         }
-
         return index;
     }
 
-
-
     private void updateMonsters(){
-
 
         if (monsterContainers.get(previousPlayerPos) != null) {
             monsterContainers.get(previousPlayerPos).getChildren().clear();
@@ -311,10 +289,14 @@ public class Main extends Application {
         Monster player = myGame.getPlayer();
         Monster opponent = myGame.getOpponent();
 
-
         // 2. Draw Player in their new position
         StackPane playerUI = new StackPane();
-        Rectangle pRect = new Rectangle(20, 20, Color.BLUEVIOLET); 
+        Rectangle pRect = new Rectangle(); 
+        pRect.setFill(Color.BLUEVIOLET);
+        // ── RESPONSIVE FIX: Bind monster size to a percentage of the screen width ──
+        pRect.widthProperty().bind(stage.widthProperty().multiply(0.015)); 
+        pRect.heightProperty().bind(stage.widthProperty().multiply(0.015)); 
+
         Label pEnergy = new Label(player.getEnergy() + "");
         pEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
         playerUI.getChildren().addAll(pRect, pEnergy);
@@ -323,7 +305,12 @@ public class Main extends Application {
 
         // 3. Draw Opponent in their new position
         StackPane opponentUI = new StackPane();
-        Rectangle oRect = new Rectangle(20, 20, Color.MAGENTA); 
+        Rectangle oRect = new Rectangle(); 
+        oRect.setFill(Color.MAGENTA);
+        // ── RESPONSIVE FIX: Bind monster size to a percentage of the screen width ──
+        oRect.widthProperty().bind(stage.widthProperty().multiply(0.015)); 
+        oRect.heightProperty().bind(stage.widthProperty().multiply(0.015)); 
+
         Label oEnergy = new Label(opponent.getEnergy() + "");
         oEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
         opponentUI.getChildren().addAll(oRect, oEnergy);
@@ -335,7 +322,6 @@ public class Main extends Application {
 
         if (currentturnLabel != null) {
             currentturnLabel.setText("Current Turn: " + myGame.getCurrent().getName());
-
             
             // ── Format Player Stats ──
             String pStats = "Name: " + player.getName() + "\n\n" +
@@ -348,7 +334,6 @@ public class Main extends Application {
                             "Confusion Turns: " + player.getConfusionTurns() + "\n" + 
                             "Frozen: " + player.isFrozen() + "\n" +
                             "Active Shield: " + player.isShielded();
-
             playerStatusLabel.setText(pStats);
 
             // ── Format Opponent Stats ──
@@ -362,27 +347,33 @@ public class Main extends Application {
                             "Confusion Turns: " + opponent.getConfusionTurns() + "\n" + 
                             "Frozen: " + opponent.isFrozen() + "\n" +
                             "Active Shield: " + opponent.isShielded();
-            
             opponentStatusLabel.setText(oStats);
         }
-
     }
-
 
    private void startGameBoard() {
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         
+        // ── RESPONSIVE FIX: Apply percentage constraints to the Grid! ──
+        for (int i = 0; i < Constants.BOARD_COLS; i++) {
+            ColumnConstraints colConst = new ColumnConstraints();
+            colConst.setPercentWidth(100.0 / Constants.BOARD_COLS);
+            grid.getColumnConstraints().add(colConst);
+        }
+        for (int i = 0; i < Constants.BOARD_ROWS; i++) {
+            RowConstraints rowConst = new RowConstraints();
+            rowConst.setPercentHeight(100.0 / Constants.BOARD_ROWS);
+            grid.getRowConstraints().add(rowConst);
+        }
+        
         Board board = myGame.getBoard();
         Cell[][] backendGrid = board.getBoardCells();
 
-        // ── PRE-FILL THE ARRAYLIST SO WE DON'T GET OUT OF BOUNDS ERRORS ──
-        monsterContainers.clear(); 
+        monsterContainers.clear();
         for (int i = 0; i < Constants.BOARD_SIZE; i++) {
             monsterContainers.add(null);
         }
-
-        
 
         for (int row = 0; row < Constants.BOARD_ROWS; row++) {
             for (int col = 0; col < Constants.BOARD_COLS; col++) {
@@ -404,7 +395,6 @@ public class Main extends Application {
                     uiCell.getChildren().add(energyLabel);
                 }
 
-                // ── THE OPTIMIZATION: Use .set() to place it in the correct index ──
                 HBox charactersBox = new HBox(5);
                 charactersBox.setAlignment(Pos.BOTTOM_CENTER);
                 monsterContainers.set(index, charactersBox); 
@@ -421,7 +411,6 @@ public class Main extends Application {
 
         rollDiceBtn.setOnAction(e -> {
             try {
-
                 Card currentCard = myGame.getBoard().getCards().getFirst();
                 int deckSizeBefore = myGame.getBoard().getCards().size();
                 Monster activeMonster = myGame.getCurrent();
@@ -431,6 +420,26 @@ public class Main extends Application {
                 myGame.playTurn();
                 diceRes.setText("Rolled: " + myGame.getRoll());
 
+                if(activeMonster.getPosition() == Constants.WINNING_POSITION && activeMonster.getEnergy()>= Constants.WINNING_ENERGY){
+                    ButtonType mainMenu= new ButtonType("Main Menu");
+                    ButtonType gameQuit = new ButtonType("Quit game :-( ");
+
+                    Alert gameAlert = new Alert(AlertType.CONFIRMATION);
+                    gameAlert.setTitle("Game over");
+                    gameAlert.setHeaderText(activeMonster.getName() + " Won the game!!! ");
+                    gameAlert.getButtonTypes().setAll(gameQuit, mainMenu);
+                    Optional <ButtonType> result = gameAlert.showAndWait();
+
+                    if(result.isPresent() && result.get() == mainMenu){
+                        mainMenuScene.setRoot(layout);
+                        stage.setScene(mainMenuScene);
+                        stage.sizeToScene(); 
+                        stage.centerOnScreen();
+                    }
+                    else if(result.isPresent() && result.get() == gameQuit){
+                        stage.close();
+                    }
+                }
 
                 if(initialE>activeMonster.getEnergy()){
                     Alert damageAlert = new Alert(AlertType.INFORMATION);
@@ -439,7 +448,7 @@ public class Main extends Application {
                     damageAlert.setContentText(activeMonster.getName() + " Lost " + (initialE-activeMonster.getEnergy()) + " Energy");
                     damageAlert.showAndWait();
                 }
-                if(!activeMonster.isShielded() && hadShield){ //shield was exhausted
+                if(!activeMonster.isShielded() && hadShield){
                     Alert shieldAlert = new Alert(AlertType.INFORMATION);
                     shieldAlert.setTitle("Shield Alert");
                     shieldAlert.setHeaderText("You used your shield ");
@@ -460,27 +469,26 @@ public class Main extends Application {
                     cardAlert.setContentText("This card does the following: " + currentCard.getDescription());
                     cardAlert.showAndWait();
                 }
-                updateMonsters(); 
-             } catch (InvalidMoveException ex) {
+                updateMonsters();
+            } catch (InvalidMoveException ex) {
                 Alert  oppLand = new Alert(AlertType.ERROR);
                 oppLand.setTitle("Invalid Move!");
                 oppLand.setHeaderText("Cannot land on opponent !!");
                 oppLand.setContentText("Invalid move :-)");
                 oppLand.showAndWait();
-
             }
-                 
-            
-            
         });
 
         activatePowerUpBtn.setOnAction(e -> {
             try {
                 myGame.usePowerup();
-                
                 updateMonsters(); 
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage());
+            } catch (OutOfEnergyException ex) {
+                Alert energyAlert = new Alert(AlertType.ERROR);
+                energyAlert.setTitle("Energy Alert ! ");
+                energyAlert.setHeaderText("Not enough energy");
+                energyAlert.setContentText(myGame.getCurrent().getName() + " doesnt have enough energy to activate powerup :-( ");
+                energyAlert.showAndWait();
             }
         });
 
@@ -497,9 +505,8 @@ public class Main extends Application {
         // 1. Create Left Sidebar for Player
         VBox leftSidebar = new VBox(10);
         leftSidebar.setPadding(new Insets(15));
-        leftSidebar.setPrefWidth(180);
-        leftSidebar.setMinWidth(180); // <--- ADD THIS: strictly locks the width
-        leftSidebar.setMaxWidth(180);
+        // ── RESPONSIVE FIX: Bind width to 20% of the entire window ──
+        leftSidebar.prefWidthProperty().bind(root.widthProperty().multiply(0.20)); 
         leftSidebar.setStyle("-fx-background-color: #e0f7fa; -fx-border-color: lightgray; -fx-border-width: 0 1 0 0;");
         Label pTitle = new Label("🎮 PLAYER");
         pTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
@@ -507,13 +514,12 @@ public class Main extends Application {
         playerStatusLabel.setStyle("-fx-font-size: 14px; -fx-line-spacing: 5px;");
         playerStatusLabel.setWrapText(true);
         leftSidebar.getChildren().addAll(pTitle, playerStatusLabel);
-        
+
         // 2. Create Right Sidebar for Opponent
         VBox rightSidebar = new VBox(10);
         rightSidebar.setPadding(new Insets(15));
-        rightSidebar.setPrefWidth(180);
-        rightSidebar.setMinWidth(180); // <--- ADD THIS: strictly locks the width
-        rightSidebar.setMaxWidth(180);
+        // ── RESPONSIVE FIX: Bind width to 20% of the entire window ──
+        rightSidebar.prefWidthProperty().bind(root.widthProperty().multiply(0.20)); 
         rightSidebar.setStyle("-fx-background-color: #fce4ec; -fx-border-color: lightgray; -fx-border-width: 0 0 0 1;");
         Label oTitle = new Label("👾 OPPONENT");
         oTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
@@ -537,16 +543,67 @@ public class Main extends Application {
         root.setRight(rightSidebar);
         root.setTop(topCenterBox);
 
-        // INCREASED WIDTH TO 1000 so the sidebars don't squish your board!
         Scene boardScene = new Scene(root, 1000, 800);
         stage.setScene(boardScene);
 
+        // ── CHEAT CODES ──
+        boardScene.setOnKeyPressed(event -> {
+            Monster activeMonster = myGame.getCurrent();
+            if (event.getCode() == KeyCode.W) {
+                myGame.getCurrent().setPosition(99);
+                System.out.println("CHEAT ACTIVATED: Teleported to Cell 99!");
+                updateMonsters(); 
+
+                if(activeMonster.getPosition() == Constants.WINNING_POSITION && activeMonster.getEnergy()>= Constants.WINNING_ENERGY){
+                    ButtonType mainMenu= new ButtonType("Main Menu");
+                    ButtonType gameQuit = new ButtonType("Quit game :-( ");
+
+                    Alert gameAlert = new Alert(AlertType.CONFIRMATION);
+                    gameAlert.setTitle("Game over");
+                    gameAlert.setHeaderText(activeMonster.getName() + " Won the game!!! ");
+                    gameAlert.getButtonTypes().setAll(gameQuit, mainMenu);
+                    Optional <ButtonType> result = gameAlert.showAndWait();
+
+                    if(result.isPresent() && result.get() == mainMenu){
+                        mainMenuScene.setRoot(layout);
+                        stage.setScene(mainMenuScene);
+                        stage.sizeToScene(); 
+                        stage.centerOnScreen();
+                    }
+                    else if(result.isPresent() && result.get() == gameQuit){
+                        stage.close();
+                    }
+                }
+                
+            } else if (event.getCode() == KeyCode.E) {
+                myGame.getCurrent().setEnergy(myGame.getCurrent().getEnergy() + 1000);
+                System.out.println("CHEAT ACTIVATED: +1000 Energy!");
+                updateMonsters(); 
+                
+                if(activeMonster.getPosition() == Constants.WINNING_POSITION && activeMonster.getEnergy()>= Constants.WINNING_ENERGY){
+                    ButtonType mainMenu= new ButtonType("Main Menu");
+                    ButtonType gameQuit = new ButtonType("Quit game :-( ");
+
+                    Alert gameAlert = new Alert(AlertType.CONFIRMATION);
+                    gameAlert.setTitle("Game over");
+                    gameAlert.setHeaderText(activeMonster.getName() + " Won the game!!! ");
+                    gameAlert.getButtonTypes().setAll(gameQuit, mainMenu);
+                    Optional <ButtonType> result = gameAlert.showAndWait();
+
+                    if(result.isPresent() && result.get() == mainMenu){
+                        mainMenuScene.setRoot(layout);
+                        stage.setScene(mainMenuScene);
+                        stage.sizeToScene(); 
+                        stage.centerOnScreen();
+                    }
+                    else if(result.isPresent() && result.get() == gameQuit){
+                        stage.close();
+                    }
+                }
+            }
+        });
+
         // Call update monsters for initial starting pos 
         updateMonsters();
-    
-        
     }
-
-
-} 
-
+}
