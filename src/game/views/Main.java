@@ -426,7 +426,8 @@ public class Main extends Application {
 
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
-                    gameAlert.setHeaderText(activeMonster.getName() + " Won the game!!! ");
+                    gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
+                    gameAlert.setContentText(activeMonster.getName() + " Won!!");
                     gameAlert.getButtonTypes().setAll(gameQuit, mainMenu);
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
@@ -594,7 +595,8 @@ public class Main extends Application {
 
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
-                    gameAlert.setHeaderText(activeMonster.getName() + " Won the game!!! ");
+                    gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
+                    gameAlert.setContentText(activeMonster.getName() + " Won!!");
                     gameAlert.getButtonTypes().setAll(gameQuit, mainMenu);
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
@@ -620,7 +622,8 @@ public class Main extends Application {
 
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
-                    gameAlert.setHeaderText(activeMonster.getName() + " Won the game!!! ");
+                    gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
+                    gameAlert.setContentText(activeMonster.getName() + " Won!!");
                     gameAlert.getButtonTypes().setAll( mainMenu,gameQuit);
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
