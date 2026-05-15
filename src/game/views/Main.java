@@ -3,7 +3,7 @@ package game.views;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-
+import java.util.Arrays;
 import game.engine.Board;
 import game.engine.Constants;
 import game.engine.Game;
@@ -15,6 +15,7 @@ import game.engine.cells.ContaminationSock;
 import game.engine.cells.ConveyorBelt;
 import game.engine.cells.DoorCell;
 import game.engine.cells.MonsterCell;
+import game.engine.exceptions.InvalidMoveException;
 import game.engine.monsters.Monster;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -26,6 +27,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -419,46 +421,56 @@ public class Main extends Application {
 
         rollDiceBtn.setOnAction(e -> {
             try {
+
+                Card currentCard = myGame.getBoard().getCards().getFirst();
+                int deckSizeBefore = myGame.getBoard().getCards().size();
+                Monster activeMonster = myGame.getCurrent();
+                Boolean hadShield = activeMonster.isShielded();
+                int initialE = activeMonster.getEnergy();
+
                 myGame.playTurn();
                 diceRes.setText("Rolled: " + myGame.getRoll());
+
+
+                if(initialE>activeMonster.getEnergy()){
+                    Alert damageAlert = new Alert(AlertType.INFORMATION);
+                    damageAlert.setTitle("Damage Alert !");
+                    damageAlert.setHeaderText(activeMonster.getName() +" sustained damage :-(");
+                    damageAlert.setContentText(activeMonster.getName() + " Lost " + (initialE-activeMonster.getEnergy()) + " Energy");
+                    damageAlert.showAndWait();
+                }
+                if(!activeMonster.isShielded() && hadShield){ //shield was exhausted
+                    Alert shieldAlert = new Alert(AlertType.INFORMATION);
+                    shieldAlert.setTitle("Shield Alert");
+                    shieldAlert.setHeaderText("You used your shield ");
+                    shieldAlert.setContentText(activeMonster.getName() +" used their shield to block the negative energy effect !!");
+                    shieldAlert.showAndWait();
+                }
+                if(myGame.getRoll() ==0 ){
+                    Alert frozAlert = new Alert(AlertType.ERROR);
+                    frozAlert.setTitle("FREEZE !");
+                    frozAlert.setHeaderText("You are Frozen !");
+                    frozAlert.setContentText("Turn is skipped because you are frozen ! better luck next time :P");
+                    frozAlert.showAndWait();
+                }
+                if(myGame.getBoard().getCards().size()< deckSizeBefore){
+                    Alert cardAlert = new Alert(AlertType.INFORMATION);
+                    cardAlert.setTitle("LANDED ON CARD CELL !!");
+                    cardAlert.setHeaderText(activeMonster.getName() +" drew " + currentCard.getName() + " this is a " + currentCard.getClass().getSimpleName());
+                    cardAlert.setContentText("This card does the following: " + currentCard.getDescription());
+                    cardAlert.showAndWait();
+                }
                 updateMonsters(); 
-             } catch (Exception ex) {
-                System.out.println(ex.getMessage());
+             } catch (InvalidMoveException ex) {
+                Alert  oppLand = new Alert(AlertType.ERROR);
+                oppLand.setTitle("Invalid Move!");
+                oppLand.setHeaderText("Cannot land on opponent !!");
+                oppLand.setContentText("Invalid move :-)");
+                oppLand.showAndWait();
+
             }
-                  if (Board.getCards().isEmpty()) {
-                    Board.reloadCards();
-                }
-                Card topCardBeforeTurn = Board.getCards().get(0);
-                int sizeBefore = Board.getCards().size();
-                // Check for roll of 0 and if player is frozen or landed on opponent
-                 if (myGame.getRoll() == 0) {
-                    // Check if player is frozen
-                    if(myGame.getCurrent().isFrozen()) {
-                    myGame.getCurrent().setFrozen(false); // Unfreeze the player for the next turn
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Turn Skipped");
-                    alert.setHeaderText("Freeze Effect!");
-                    alert.setContentText("The player was frozen and skipped their turn.");
-                    alert.showAndWait();}
-                    //landed on opponent alert
-                    else if(myGame.getPlayer().getPosition() == myGame.getOpponent().getPosition()){ 
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Turn Skipped");
-                        alert.setHeaderText("Landed on opponent!");
-                        alert.setContentText("You rolled a 0 and cannot move this turn.");
-                        alert.showAndWait();
-                    
-                    }
-                    //drawing card alert
-                } else if (Board.getCards().size() < sizeBefore) {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Card Drawn");
-                    alert.setHeaderText("You drew: " + topCardBeforeTurn.getName());
-                    alert.setContentText("Effect: " + topCardBeforeTurn.getDescription());
-                    alert.showAndWait();
-                }
-                
-           
+                 
+            
             
         });
 
