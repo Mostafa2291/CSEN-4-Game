@@ -258,6 +258,7 @@ public class Main extends Application {
         }
         else {
             cssColor = "papayawhip";
+          
         }
 
         pane.setStyle("-fx-background-color: " + cssColor + "; -fx-border-color: black; -fx-border-width: 0.5px;");
@@ -394,6 +395,12 @@ public class Main extends Application {
                     energyLabel.setStyle("-fx-font-size: 10px;");
                     StackPane.setAlignment(energyLabel, Pos.CENTER);
                     uiCell.getChildren().add(energyLabel);
+                        ImageView closedDoorImage = new ImageView(new Image("file:Resources/Images/closed door.jpeg"));
+                        closedDoorImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.3));
+                        closedDoorImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.3));
+                        uiCell.getChildren().add(closedDoorImage);
+                        uiCell.setAlignment(closedDoorImage,Pos.BOTTOM_RIGHT);
+                
                 }
 
                 HBox charactersBox = new HBox(5);
@@ -405,7 +412,7 @@ public class Main extends Application {
                 grid.add(uiCell, col, gridRow);
             }
         }
-
+      
         // ── BUTTON CONTROLS ──
         Button rollDiceBtn = new Button("Roll Dice");
         Button activatePowerUpBtn = new Button("Activate PowerUp!");
@@ -417,9 +424,12 @@ public class Main extends Application {
                 Monster activeMonster = myGame.getCurrent();
                 Boolean hadShield = activeMonster.isShielded();
                 int initialE = activeMonster.getEnergy();
+                 
                
                 myGame.playTurn();
                 diceRes.setText("Rolled: " + myGame.getRoll());
+
+      
                
                 if(activeMonster.getPosition() == Constants.WINNING_POSITION && activeMonster.getEnergy()>= Constants.WINNING_ENERGY){
                     ButtonType mainMenu= new ButtonType("Main Menu");
@@ -442,6 +452,7 @@ public class Main extends Application {
                         stage.close();
                     }
                 }
+    
 
                 if(initialE>activeMonster.getEnergy()){
                     Alert damageAlert = new Alert(AlertType.INFORMATION);
