@@ -12,6 +12,7 @@ import game.engine.Constants;
 import game.engine.Game;
 import game.engine.Role;
 import game.engine.cards.Card;
+import game.engine.cards.ConfusionCard;
 import game.engine.cells.CardCell;
 import game.engine.cells.Cell;
 import game.engine.cells.ContaminationSock;
@@ -86,7 +87,7 @@ public class Main extends Application {
         // ── Main Menu ─────────────────────────────────────────────────────────
         layout = new VBox(15);
         layout.setAlignment(Pos.CENTER);
-        layout.getChildren().addAll(start, controls, instructions, quit);
+        layout.getChildren().addAll(start, instructions, quit);
 
         BackgroundImage menuBG = new BackgroundImage(
             new Image("file:Resources/Images/background2.jpg"),
@@ -416,10 +417,10 @@ public class Main extends Application {
                 Monster activeMonster = myGame.getCurrent();
                 Boolean hadShield = activeMonster.isShielded();
                 int initialE = activeMonster.getEnergy();
-
+               
                 myGame.playTurn();
                 diceRes.setText("Rolled: " + myGame.getRoll());
-
+               
                 if(activeMonster.getPosition() == Constants.WINNING_POSITION && activeMonster.getEnergy()>= Constants.WINNING_ENERGY){
                     ButtonType mainMenu= new ButtonType("Main Menu");
                     ButtonType gameQuit = new ButtonType("Quit game :-( ");
@@ -466,10 +467,17 @@ public class Main extends Application {
                 if(myGame.getBoard().getCards().size()< deckSizeBefore){
                     Alert cardAlert = new Alert(AlertType.INFORMATION);
                     cardAlert.setTitle("LANDED ON CARD CELL !!");
+                    if(currentCard instanceof ConfusionCard){
+                        cardAlert.setHeaderText(activeMonster.getName() + " drew " + currentCard.getName() + " this is a " + currentCard.getClass().getSimpleName());
+                        cardAlert.setContentText("Both monsters are confused causing them to swap roles for " + activeMonster.getConfusionTurns() + " Turns");
+                    }
+                    else{
                     cardAlert.setHeaderText(activeMonster.getName() +" drew " + currentCard.getName() + " this is a " + currentCard.getClass().getSimpleName());
                     cardAlert.setContentText("This card does the following: " + currentCard.getDescription());
+                    }
                     cardAlert.showAndWait();
                 }
+               
                 updateMonsters();
             } catch (InvalidMoveException ex) {
                 Alert  oppLand = new Alert(AlertType.ERROR);
