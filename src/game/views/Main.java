@@ -46,6 +46,7 @@ public class Main extends Application {
     private ArrayList<HBox> monsterContainers = new ArrayList<>();
     private int previousPlayerPos = 0;
     private int previousOpponentPos = 0;
+    private ImageView[] doorImageViews;
 
     private Label diceRes;
     private Label currentturnLabel;
@@ -292,6 +293,13 @@ public class Main extends Application {
         Monster player = myGame.getPlayer();
         Monster opponent = myGame.getOpponent();
 
+        if (doorImageViews != null && doorImageViews[player.getPosition()] != null) {
+            doorImageViews[player.getPosition()].setImage(new Image("file:Resources/Images/open door.jpeg"));
+        }
+        if (doorImageViews != null && doorImageViews[opponent.getPosition()] != null) {
+            doorImageViews[opponent.getPosition()].setImage(new Image("file:Resources/Images/open door.jpeg"));
+        }
+
         // 2. Draw Player in their new position
         StackPane playerUI = new StackPane();
         Rectangle pRect = new Rectangle();
@@ -491,6 +499,7 @@ public class Main extends Application {
         Cell[][] backendGrid = board.getBoardCells();
 
         monsterContainers.clear();
+        doorImageViews = new ImageView[Constants.BOARD_SIZE];
         for (int i = 0; i < Constants.BOARD_SIZE; i++) {
             monsterContainers.add(null);
         }
@@ -554,7 +563,7 @@ public class Main extends Application {
                         closedDoorImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.3));
                         uiCell.getChildren().add(closedDoorImage);
                         uiCell.setAlignment(closedDoorImage,Pos.BOTTOM_RIGHT);
-                
+                        doorImageViews[index] = closedDoorImage;
                 }
             
 
