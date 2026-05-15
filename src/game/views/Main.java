@@ -6,6 +6,13 @@ import java.util.Random;
 import java.util.Arrays;
 import java.util.Optional;
 
+// Added for Instructions Cutscene
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
+
 import javafx.scene.input.KeyCode;
 import game.engine.Board;
 import game.engine.Constants;
@@ -35,7 +42,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*; // Imports ColumnConstraints and RowConstraints automatically!
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
@@ -129,72 +136,145 @@ public class Main extends Application {
 
         roleSelectRoot.getChildren().addAll(backgroundSplitter, roleButtons, back);
 
-        // ── Instructions Screen ───────────────────────────────────────────────
-        StackPane instructionPane = new StackPane();
-        Label instructionTitle = new Label("GAME INSTRUCTIONS");
-        instructionTitle.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
-        StackPane.setAlignment(instructionTitle, Pos.TOP_CENTER);
-        StackPane.setMargin(instructionTitle, new Insets(20));
+        // ── INTERACTIVE INSTRUCTIONS CUTSCENE ─────────────────────────────────
+        Pane interactiveInstructionPane = new Pane();
+        interactiveInstructionPane.setStyle("-fx-background-color: black;");
 
-        TextArea instructionsTxt = new TextArea(
-            "Welcome to DooR DasH: Scare vs Laugh Touchdown 👾⚡\n\n" +
-            "Step onto the Floor of Monstropolis, where only the smartest, fastest, and most daring monster will claim victory.\n\n" +
-            "Reach Boo's Door with at least 1000 energy before your rival does.\n\n" +
-            "──────────────────────────────\n" +
-            "HOW THE GAME WORKS\n" +
-            "──────────────────────────────\n" +
-            "Move across a wild 100-cell board filled with:\n" +
-            "  🚪 Energy Doors\n" +
-            "  ⚙️  Conveyor Belts\n" +
-            "  🧦 Contamination Socks\n" +
-            "  👹 Monster Cells\n" +
-            "  🎴 Mystery Cards\n\n" +
-            "Every turn:\n" +
-            "  • Optionally activate your monster's special powerup\n" +
-            "  • Roll the dice 🎲\n" +
-            "  • Move across the Floor\n" +
-            "  • Trigger the effect of the cell you land on\n\n" +
-            "But be careful — one lucky card or dangerous sock can completely flip the game.\n\n" +
-            "──────────────────────────────\n" +
-            "CHOOSE YOUR MONSTER STYLE\n" +
-            "──────────────────────────────\n" +
-            "  ⚡ Dashers      — blaze through the board at incredible speed.\n" +
-            "  💥 Dynamos      — gain massive energy but suffer massive losses.\n" +
-            "  🔀 Multitaskers — sacrifice movement for stronger energy control.\n" +
-            "  🎭 Schemers     — manipulate everyone and steal energy like pros.\n\n" +
-            "──────────────────────────────\n" +
-            "DOORS DECIDE EVERYTHING\n" +
-            "──────────────────────────────\n" +
-            "Landing on the right door boosts your entire team's energy.\n" +
-            "Landing on the wrong one? Your whole team pays the price.\n" +
-            "Shields, confusion cards, steals, swaps, and monster abilities create nonstop chaos where no lead is ever safe. 🔥\n\n" +
-            "──────────────────────────────\n" +
-            "VICTORY\n" +
-            "──────────────────────────────\n" +
-            "To win, you must:\n" +
-            "  • Reach the final cell: Boo's Door (Cell 99)\n" +
-            "  • Have 1000+ energy\n" +
-            "  • Outsmart your opponent before they do the same\n\n" +
-            "One monster enters the spotlight.\n" +
-            "One monster powers Monstropolis.\n" +
-            "Will you scare… or make them laugh? 🎭"
-        );
-        instructionsTxt.setEditable(false);
-        instructionsTxt.setWrapText(true);
-        instructionsTxt.setStyle("-fx-font-size: 14px;");
-        instructionsTxt.setMaxWidth(600);
-        instructionsTxt.setMaxHeight(400);
+        // 1. The Background Image
+        ImageView instBg = new ImageView(new Image("file:Resources/Images/mike_sulley.jpg"));
+        instBg.fitWidthProperty().bind(stage.widthProperty());
+        instBg.fitHeightProperty().bind(stage.heightProperty());
+        instBg.setPreserveRatio(false);
 
-        StackPane.setAlignment(backInstructions, Pos.BOTTOM_LEFT);
-        StackPane.setMargin(backInstructions, new Insets(20));
+        // 2. Sulley's Speech Bubble (Positioned Top-Left)
+        Label sulleyBubble = new Label();
+        sulleyBubble.setStyle("-fx-background-color: white; -fx-padding: 20px; -fx-background-radius: 20px; -fx-border-radius: 20px; -fx-border-color: #333; -fx-border-width: 4px; -fx-font-size: 18px; -fx-font-weight: bold;");
+        sulleyBubble.setWrapText(true);
+        sulleyBubble.setMaxWidth(400);
+        sulleyBubble.layoutXProperty().bind(stage.widthProperty().multiply(0.05));
+        sulleyBubble.layoutYProperty().bind(stage.heightProperty().multiply(0.10));
+        sulleyBubble.setVisible(false);
 
-        BackgroundImage instBG = new BackgroundImage(
-            new Image("file:Resources/Images/inst.jpg"),
-            BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition.CENTER, bSize
-        );
-        instructionPane.setBackground(new Background(instBG));
-        instructionPane.getChildren().addAll(instructionTitle, instructionsTxt, backInstructions);
+        // 3. Mike's Speech Bubble (Positioned Middle-Right)
+        Label mikeBubble = new Label();
+        mikeBubble.setStyle("-fx-background-color: white; -fx-padding: 20px; -fx-background-radius: 20px; -fx-border-radius: 20px; -fx-border-color: #333; -fx-border-width: 4px; -fx-font-size: 18px; -fx-font-weight: bold;");
+        mikeBubble.setWrapText(true);
+        mikeBubble.setMaxWidth(400);
+        mikeBubble.layoutXProperty().bind(stage.widthProperty().multiply(0.55));
+        mikeBubble.layoutYProperty().bind(stage.heightProperty().multiply(0.40));
+        mikeBubble.setVisible(false);
+
+        // 4. The Enter Prompt
+        Label continuePrompt = new Label("Press [ENTER] to continue... Press [ESC] to skip");
+        continuePrompt.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: rgba(0,0,0,0.6); -fx-padding: 10px;");
+        continuePrompt.setLayoutX(20);
+        continuePrompt.layoutYProperty().bind(stage.heightProperty().subtract(80));
+
+        interactiveInstructionPane.getChildren().addAll(instBg, sulleyBubble, mikeBubble, continuePrompt);
+        Scene instructionScene = new Scene(interactiveInstructionPane, 800, 600);
+
+        // 5. The Dialogue Script
+        String[][] dialogues = {
+            {"MIKE", "Welcome to DooR DasH: Scare vs Laugh Touchdown! 👾⚡"},
+            {"SULLEY", "Step onto the Floor of Monstropolis... reach Boo's Door with 1000 energy before your rival does."},
+            {"MIKE", "Move across a 100-cell board! Watch out for Energy Doors, Conveyor Belts, and... ugh... Contamination Socks."},
+            {"SULLEY", "Every turn, you can use a powerup, roll the dice, and move. But beware, cards and socks change everything."},
+            {"MIKE", "Pick your style! Dashers are fast, Dynamos get huge energy, Multitaskers balance it, and Schemers... well, they scheme."},
+            {"SULLEY", "To win, hit Boo's Door at cell 99 with 1000+ energy. Will you scare… or make them laugh?"}
+        };
+
+        // 6. Animation & Audio State Variables
+        int[] state = {0}; 
+        boolean[] isTyping = {false};
+        String[] fullCurrentText = {""};
+        Timeline[] typingTimeline = {new Timeline()};
+        Random randAudio = new Random();
+        
+        MediaPlayer tempPlayer = null;
+        try {
+            String absolutePath = new java.io.File("Resources/Audio/mumble.wav").getAbsolutePath();
+            Media sound = new Media(new java.io.File(absolutePath).toURI().toString());
+            tempPlayer = new MediaPlayer(sound);
+            tempPlayer.setCycleCount(MediaPlayer.INDEFINITE); 
+        } catch (Throwable ex) {
+            System.out.println("AUDIO FAILED TO LOAD:");
+            ex.printStackTrace();
+        }
+        final MediaPlayer finalMumble = tempPlayer;
+
+        // 7. The Method that plays the next dialogue line
+        Runnable playNextDialogue = () -> {
+            if (state[0] >= dialogues.length) {
+                // BUG FIX: Stop audio completely when dialogue ends naturally
+                if (finalMumble != null) finalMumble.stop(); 
+                stage.setScene(mainMenuScene); 
+                return;
+            }
+
+            isTyping[0] = true;
+            String speaker = dialogues[state[0]][0];
+            fullCurrentText[0] = dialogues[state[0]][1];
+
+            Label activeBubble = speaker.equals("MIKE") ? mikeBubble : sulleyBubble;
+            Label inactiveBubble = speaker.equals("MIKE") ? sulleyBubble : mikeBubble;
+
+            inactiveBubble.setVisible(false);
+            activeBubble.setVisible(true);
+            activeBubble.setText(""); 
+
+            if (finalMumble != null) {
+                finalMumble.stop(); 
+
+                double randomStartTime = randAudio.nextDouble() * 20.0;
+                finalMumble.seek(Duration.seconds(randomStartTime));
+
+                if (speaker.equals("MIKE")) {
+                    finalMumble.setRate(1.6); 
+                } else {
+                    finalMumble.setRate(1.0); 
+                }
+                finalMumble.play();
+            }
+
+            typingTimeline[0].stop();
+            typingTimeline[0].getKeyFrames().clear();
+
+            for (int i = 0; i < fullCurrentText[0].length(); i++) {
+                final int charIndex = i;
+                KeyFrame frame = new KeyFrame(Duration.millis(35 * i), e -> {
+                    activeBubble.setText(fullCurrentText[0].substring(0, charIndex + 1));
+                });
+                typingTimeline[0].getKeyFrames().add(frame);
+            }
+
+            KeyFrame endFrame = new KeyFrame(Duration.millis(35 * fullCurrentText[0].length()), e -> {
+                isTyping[0] = false;
+                if (finalMumble != null) finalMumble.pause(); 
+            });
+            typingTimeline[0].getKeyFrames().add(endFrame);
+            typingTimeline[0].play();
+        };
+
+        // 8. Handle Keyboard Inputs
+        instructionScene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                if (isTyping[0]) {
+                    typingTimeline[0].stop();
+                    Label activeBubble = dialogues[state[0]][0].equals("MIKE") ? mikeBubble : sulleyBubble;
+                    activeBubble.setText(fullCurrentText[0]);
+                    isTyping[0] = false;
+                    if (finalMumble != null) finalMumble.pause();
+                } else {
+                    state[0]++;
+                    playNextDialogue.run();
+                }
+            } else if (event.getCode() == KeyCode.ESCAPE) {
+                 typingTimeline[0].stop();
+                 // BUG FIX: Stop audio completely when skipping with ESC
+                 if (finalMumble != null) finalMumble.stop(); 
+                 stage.setScene(mainMenuScene);
+            } 
+        });
 
         // ── Scene ─────────────────────────────────────────────────────────────
         mainMenuScene = new Scene(layout, 800, 600);
@@ -207,7 +287,13 @@ public class Main extends Application {
         start.setOnMouseEntered(e -> start.setText("> Start Game !!"));
         start.setOnMouseExited(e  -> start.setText("Start Game!"));
 
-        instructions.setOnAction(e -> stage.getScene().setRoot(instructionPane));
+        instructions.setOnAction(e -> {
+            sulleyBubble.setVisible(false);
+            mikeBubble.setVisible(false);
+            stage.setScene(instructionScene);
+            state[0] = 0;
+            playNextDialogue.run(); 
+        });
         instructions.setOnMouseEntered(e -> instructions.setText("Game Instructions"));
         instructions.setOnMouseExited(e  -> instructions.setText("Instructions"));
 
@@ -260,11 +346,9 @@ public class Main extends Application {
         }
         else {
             cssColor = "papayawhip";
-          
         }
 
         pane.setStyle("-fx-background-color: " + cssColor + "; -fx-border-color: black; -fx-border-width: 0.5px;");
-        
         // ── RESPONSIVE FIX: Allow the pane to grow indefinitely instead of setting a fixed 60x60 ──
         pane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         return pane;
@@ -292,7 +376,6 @@ public class Main extends Application {
 
         Monster player = myGame.getPlayer();
         Monster opponent = myGame.getOpponent();
-
         if (doorImageViews != null && doorImageViews[player.getPosition()] != null) {
             doorImageViews[player.getPosition()].setImage(new Image("file:Resources/Images/open door.jpeg"));
         }
@@ -304,7 +387,6 @@ public class Main extends Application {
         StackPane playerUI = new StackPane();
         Rectangle pRect = new Rectangle();
         Rectangle pImage = new Rectangle();
-
         //setting player image
         if(myGame.getPlayer().getName().equals("Mike Wazowski")){
             pRect.setFill(Color.GREEN);
@@ -319,7 +401,7 @@ public class Main extends Application {
         }
         else if(myGame.getPlayer().getName().equals("Randall Boggs")){
             pRect.setFill(Color.PURPLE);
-                ImageView playeri = new ImageView(new Image("file:Resources/Images/Randall Boggs.jpg"));
+            ImageView playeri = new ImageView(new Image("file:Resources/Images/Randall Boggs.jpg"));
                 pImage.setFill(new ImagePattern(playeri.getImage()));
         }
         else if(myGame.getPlayer().getName().equals("Celia Mae")){
@@ -335,25 +417,23 @@ public class Main extends Application {
       
         else if(myGame.getPlayer().getName().equals("Fungus")){
              pRect.setFill(Color.WHITE);
-            ImageView playeri = new ImageView(new Image("file:Resources/Images/Fungus.jpg"));
+             ImageView playeri = new ImageView(new Image("file:Resources/Images/Fungus.jpg"));
             pImage.setFill(new ImagePattern(playeri.getImage()));
         }
          else if(myGame.getPlayer().getName().equals("Henry J. Waternoose")){
              pRect.setFill(Color.WHITE);
-            ImageView playeri = new ImageView(new Image("file:Resources/Images/Henry J.Waternoose.jpg"));
+             ImageView playeri = new ImageView(new Image("file:Resources/Images/Henry J.Waternoose.jpg"));
             pImage.setFill(new ImagePattern(playeri.getImage()));
         }
         else if(myGame.getPlayer().getName().equals("Yeti")){
              pRect.setFill(Color.WHITE);
-            ImageView playeri = new ImageView(new Image("file:Resources/Images/Yeti.jpg"));
+             ImageView playeri = new ImageView(new Image("file:Resources/Images/Yeti.jpg"));
             pImage.setFill(new ImagePattern(playeri.getImage()));
       
         }
 
-
-
         // ── RESPONSIVE FIX: Bind monster size to a percentage of the screen width ──
-        pRect.widthProperty().bind(stage.widthProperty().multiply(0.015)); 
+        pRect.widthProperty().bind(stage.widthProperty().multiply(0.015));
         pRect.heightProperty().bind(stage.widthProperty().multiply(0.015)); 
         pImage.widthProperty().bind(stage.widthProperty().multiply(0.015));
         pImage.heightProperty().bind(stage.widthProperty().multiply(0.015));
@@ -364,14 +444,13 @@ public class Main extends Application {
         playerUI.getChildren().addAll(pRect, pEnergy,pImage);
         
         monsterContainers.get(player.getPosition()).getChildren().add(playerUI);
-
         // 3. Draw Opponent in their new position
         StackPane opponentUI = new StackPane();
         Rectangle oRect = new Rectangle(); 
         Rectangle oImage = new Rectangle();
         oRect.setFill(Color.MAGENTA);
         // ── RESPONSIVE FIX: Bind monster size to a percentage of the screen width ──
-        oRect.widthProperty().bind(stage.widthProperty().multiply(0.015)); 
+        oRect.widthProperty().bind(stage.widthProperty().multiply(0.015));
         oRect.heightProperty().bind(stage.widthProperty().multiply(0.015)); 
         oImage.widthProperty().bind(stage.widthProperty().multiply(0.015));
         oImage.heightProperty().bind(stage.widthProperty().multiply(0.015));
@@ -381,14 +460,12 @@ public class Main extends Application {
         opponentUI.getChildren().addAll(oRect, oEnergy,oImage);
         
         monsterContainers.get(opponent.getPosition()).getChildren().add(opponentUI);
-
         previousPlayerPos = player.getPosition();
         previousOpponentPos = opponent.getPosition();
 
         if (currentturnLabel != null) {
             currentturnLabel.setText("Current Turn: " + myGame.getCurrent().getName());
-
-             //setting opponent image 
+            //setting opponent image 
          if(myGame.getOpponent().getName().equals("Mike Wazowski")){
             oRect.setFill(Color.GREEN);
             ImageView opponenti = new ImageView(new Image("file:Resources/Images/Mike Wazowski.jpg"));
@@ -402,7 +479,7 @@ public class Main extends Application {
         }
         else if(myGame.getOpponent().getName().equals("Randall Boggs")){
             oRect.setFill(Color.PURPLE);
-                ImageView opponenti = new ImageView(new Image("file:Resources/Images/Randall Boggs.jpg"));
+            ImageView opponenti = new ImageView(new Image("file:Resources/Images/Randall Boggs.jpg"));
                 oImage.setFill(new ImagePattern(opponenti.getImage()));
         }
         else if(myGame.getOpponent().getName().equals("Celia Mae")){
@@ -418,17 +495,17 @@ public class Main extends Application {
       
         else if(myGame.getOpponent().getName().equals("Fungus")){
              oRect.setFill(Color.WHITE);
-            ImageView opponenti = new ImageView(new Image("file:Resources/Images/Fungus.jpg"));
+             ImageView opponenti = new ImageView(new Image("file:Resources/Images/Fungus.jpg"));
             oImage.setFill(new ImagePattern(opponenti.getImage()));
         }
          else if(myGame.getOpponent().getName().equals("Henry J. Waternoose")){
              oRect.setFill(Color.WHITE);
-            ImageView opponenti = new ImageView(new Image("file:Resources/Images/Henry J.Waternoose.jpg"));
+             ImageView opponenti = new ImageView(new Image("file:Resources/Images/Henry J.Waternoose.jpg"));
             oImage.setFill(new ImagePattern(opponenti.getImage()));
         }
         else if(myGame.getOpponent().getName().equals("Yeti")){
              oRect.setFill(Color.WHITE);
-            ImageView opponenti = new ImageView(new Image("file:Resources/Images/Yeti.jpg"));
+             ImageView opponenti = new ImageView(new Image("file:Resources/Images/Yeti.jpg"));
             oImage.setFill(new ImagePattern(opponenti.getImage()));
       
         }
@@ -473,17 +550,17 @@ public class Main extends Application {
         availableImages.add("file:Resources/Images/James p.Sullivan.jpg");
         availableImages.add("file:Resources/Images/Randall Boggs.jpg");
         availableImages.add("file:Resources/Images/Celia Mae.jpg");
-        
         String pName = myGame.getPlayer().getName();
         String oName = myGame.getOpponent().getName();
-        String pFile = pName.equals("James P. Sullivan") ? "James p.sullivan" : 
+        String pFile = pName.equals("James P. Sullivan") ?
+        "James p.sullivan" : 
                        (pName.equals("Henry J. Waternoose") ? "Henry J.Waternoose" : pName);
         String oFile = oName.equals("James P. Sullivan") ? "James p.sullivan" : 
                        (oName.equals("Henry J. Waternoose") ? "Henry J.Waternoose" : oName);
         availableImages.remove("file:Resources/Images/" + pFile + ".jpg");
         availableImages.remove("file:Resources/Images/" + oFile + ".jpg");
         
-        // ── RESPONSIVE FIX: Apply percentage constraints to the Grid! ──
+        // ── RESPONSIVE FIX: Apply percentage constraints to the Grid!
         for (int i = 0; i < Constants.BOARD_COLS; i++) {
             ColumnConstraints colConst = new ColumnConstraints();
             colConst.setPercentWidth(100.0 / Constants.BOARD_COLS);
@@ -527,7 +604,7 @@ public class Main extends Application {
                             uiCell.getChildren().add(monsterImage);
                             uiCell.setAlignment(monsterImage, Pos.CENTER);
                             availableImages.remove(chosenPath);
-                        }
+                }
                 
 
                 if(backendCell instanceof CardCell){
@@ -574,7 +651,7 @@ public class Main extends Application {
 
                 int gridRow = (Constants.BOARD_ROWS - 1) - row;
                 grid.add(uiCell, col, gridRow);
-            }
+        }
         }
       
         // ── BUTTON CONTROLS ──
@@ -593,6 +670,7 @@ public class Main extends Application {
                  
                
                 myGame.playTurn();
+    
                 diceRes.setText("Rolled: " + myGame.getRoll());
 
  
@@ -600,22 +678,26 @@ public class Main extends Application {
                     ButtonType mainMenu= new ButtonType("Main Menu");
                     ButtonType gameQuit = new ButtonType("Quit game :-( ");
 
+            
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
                     gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
                     gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
                      + myGame.getPlayer().getName() + "'s energy: " + myGame.getPlayer().getEnergy() + "\n"
                     +  myGame.getOpponent().getName() + "'s energy: " +  myGame.getOpponent().getEnergy()  );
+              
                     gameAlert.getButtonTypes().setAll(gameQuit, mainMenu);
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
                         mainMenuScene.setRoot(layout);
+                     
                         stage.setScene(mainMenuScene);
                         stage.sizeToScene(); 
                         stage.centerOnScreen();
                     }
                     else if(result.isPresent() && result.get() == gameQuit){
+   
                         stage.close();
                     }
                 }
@@ -629,21 +711,25 @@ public class Main extends Application {
                     damageAlert.showAndWait();
                 }
                 if(!activeMonster.isShielded() && hadShield){
+        
                     Alert shieldAlert = new Alert(AlertType.INFORMATION);
                     shieldAlert.setTitle("Shield Alert");
                     shieldAlert.setHeaderText("You used your shield ");
                     shieldAlert.setContentText(activeMonster.getName() +" used their shield to block the negative energy effect !!");
+        
                     shieldAlert.showAndWait();
                 }
                 if(myGame.getRoll() ==0 ){
                     Alert frozAlert = new Alert(AlertType.ERROR);
                     frozAlert.setTitle("FREEZE !");
+         
                     frozAlert.setHeaderText("You are Frozen !");
                     frozAlert.setContentText("Turn is skipped because you are frozen ! better luck next time :P");
                     frozAlert.showAndWait();
                 }
                 if(myGame.getBoard().getCards().size()< deckSizeBefore){
                     Alert cardAlert = new Alert(AlertType.INFORMATION);
+                   
                     cardAlert.setTitle("LANDED ON CARD CELL !!");
                     if(currentCard instanceof ConfusionCard){
                         cardAlert.setHeaderText(activeMonster.getName() + " drew " + currentCard.getName() + " this is a " + currentCard.getClass().getSimpleName());
@@ -665,13 +751,13 @@ public class Main extends Application {
                 oppLand.showAndWait();
             }
         });
-
         activatePowerUpBtn.setOnAction(e -> {
             try {
                 myGame.usePowerup();
                 updateMonsters(); 
             } catch (OutOfEnergyException ex) {
                 Alert energyAlert = new Alert(AlertType.ERROR);
+                
                 energyAlert.setTitle("Energy Alert ! ");
                 energyAlert.setHeaderText("Not enough energy");
                 energyAlert.setContentText(myGame.getCurrent().getName() + " doesnt have enough energy to activate powerup :-( ");
@@ -701,6 +787,7 @@ public class Main extends Application {
         pauseMenuBox.getChildren().addAll(pauseTitle, resumeBtn, quitToMenuBtn);
         pauseOverlay.getChildren().add(pauseMenuBox);
 
+     
         resumeBtn.setOnAction(e -> pauseOverlay.setVisible(false)); 
         quitToMenuBtn.setOnAction(e -> {
             pauseOverlay.setVisible(false); 
@@ -708,15 +795,12 @@ public class Main extends Application {
             stage.setScene(mainMenuScene);
         });
 
-
-
-
-
         HBox controlsBox = new HBox(20);
         controlsBox.setAlignment(Pos.CENTER);
         controlsBox.setPadding(new Insets(10));
         controlsBox.getChildren().addAll(rollDiceBtn, activatePowerUpBtn);
 
+ 
         // ── FINAL LAYOUT ──
         BorderPane root = new BorderPane();
         root.setCenter(grid);
@@ -726,7 +810,7 @@ public class Main extends Application {
         VBox leftSidebar = new VBox(10);
         leftSidebar.setPadding(new Insets(15));
         // ── RESPONSIVE FIX: Bind width to 20% of the entire window ──
-        leftSidebar.prefWidthProperty().bind(root.widthProperty().multiply(0.20)); 
+        leftSidebar.prefWidthProperty().bind(root.widthProperty().multiply(0.20));
         leftSidebar.setStyle("-fx-background-color: #e0f7fa; -fx-border-color: lightgray; -fx-border-width: 0 1 0 0;");
         Label pTitle = new Label("🎮 PLAYER");
         pTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
@@ -734,12 +818,11 @@ public class Main extends Application {
         playerStatusLabel.setStyle("-fx-font-size: 14px; -fx-line-spacing: 5px;");
         playerStatusLabel.setWrapText(true);
         leftSidebar.getChildren().addAll(pTitle, playerStatusLabel);
-
         // 2. Create Right Sidebar for Opponent
         VBox rightSidebar = new VBox(10);
         rightSidebar.setPadding(new Insets(15));
         // ── RESPONSIVE FIX: Bind width to 20% of the entire window ──
-        rightSidebar.prefWidthProperty().bind(root.widthProperty().multiply(0.20)); 
+        rightSidebar.prefWidthProperty().bind(root.widthProperty().multiply(0.20));
         rightSidebar.setStyle("-fx-background-color: #fce4ec; -fx-border-color: lightgray; -fx-border-width: 0 0 0 1;");
         Label oTitle = new Label("👾 OPPONENT");
         oTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
@@ -747,7 +830,6 @@ public class Main extends Application {
         opponentStatusLabel.setStyle("-fx-font-size: 14px; -fx-line-spacing: 5px;");
         opponentStatusLabel.setWrapText(true);
         rightSidebar.getChildren().addAll(oTitle, opponentStatusLabel);
-
         // 3. Create Top Bar for Turn and Dice Roll
         VBox topCenterBox = new VBox(5);
         topCenterBox.setAlignment(Pos.CENTER);
@@ -766,7 +848,6 @@ public class Main extends Application {
         basePane.getChildren().addAll(root,pauseOverlay);
         Scene boardScene = new Scene(basePane, 1000, 800);
         stage.setScene(boardScene);
-
         // ── CHEAT CODES ──
         boardScene.setOnKeyPressed(event -> {
             Monster activeMonster = myGame.getCurrent();
@@ -775,11 +856,13 @@ public class Main extends Application {
                 System.out.println("CHEAT ACTIVATED: Teleported to Cell 99!");
                 updateMonsters(); 
 
+ 
                 if(activeMonster.getPosition() == Constants.WINNING_POSITION && activeMonster.getEnergy()>= Constants.WINNING_ENERGY){
                     ButtonType mainMenu= new ButtonType("Main Menu");
                     ButtonType gameQuit = new ButtonType("Quit game :-( ");
 
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
+     
                     gameAlert.setTitle("Game over");
                     gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
                     gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
@@ -811,15 +894,18 @@ public class Main extends Application {
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
                     gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
-                   gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
+                   
+                    gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
                      + myGame.getPlayer().getName() + "'s energy: " + myGame.getPlayer().getEnergy() + "\n"
                     +  myGame.getOpponent().getName() + "'s energy: " +  myGame.getOpponent().getEnergy()  );
                     gameAlert.getButtonTypes().setAll( mainMenu,gameQuit);
+             
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
                         mainMenuScene.setRoot(layout);
                         stage.setScene(mainMenuScene);
+                 
                         stage.sizeToScene(); 
                         stage.centerOnScreen();
                     }
@@ -830,11 +916,9 @@ public class Main extends Application {
             }
             else if (event.getCode() == KeyCode.ESCAPE){
                 pauseOverlay.setVisible(!pauseOverlay.isVisible());
-
             }
            
         });
-
         // Call update monsters for initial starting pos 
         updateMonsters();
     }
