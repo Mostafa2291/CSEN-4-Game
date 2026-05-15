@@ -255,7 +255,7 @@ public class Main extends Application {
             cssColor = "magenta";
         }
         else if (modelCell instanceof ContaminationSock){
-            cssColor = "darkorchid";
+            cssColor = "GreenYellow";
         }
         else {
             cssColor = "papayawhip";
@@ -489,12 +489,36 @@ public class Main extends Application {
                 numberLabel.setStyle("-fx-font-size: 10px; -fx-font-weight: bold;");
                 StackPane.setAlignment(numberLabel, Pos.TOP_LEFT);
                 uiCell.getChildren().add(numberLabel);
+
+                if(backendCell instanceof MonsterCell){
+                    ImageView monsterImage = new ImageView(new Image("file:Resources/Images/Mon.jpg"));
+                    monsterImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.6));
+                    monsterImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.6));
+                    uiCell.getChildren().add(monsterImage);
+                    uiCell.setAlignment(monsterImage,Pos.CENTER);
+                }
+
+                if(backendCell instanceof CardCell){
+                    ImageView cardImage = new ImageView(new Image("file:Resources/Images/Card.jpg"));
+                    cardImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.6));
+                    cardImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.6));
+                    uiCell.getChildren().add(cardImage);
+                    uiCell.setAlignment(cardImage,Pos.CENTER);
+                }
+
                 if(backendCell instanceof ConveyorBelt){
                     ImageView conveyorImage = new ImageView(new Image("file:Resources/Images/Conveyer.jpg"));
-                    conveyorImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.3));
-                    conveyorImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.3));
+                    conveyorImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.6));
+                    conveyorImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.6));
                     uiCell.getChildren().add(conveyorImage);
-                    uiCell.setAlignment(conveyorImage,Pos.BOTTOM_RIGHT);
+                    uiCell.setAlignment(conveyorImage,Pos.CENTER);
+                }
+                if(backendCell instanceof ContaminationSock){
+                    ImageView sockImage = new ImageView(new Image("file:Resources/Images/Sock.jpg"));
+                    sockImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.6));
+                    sockImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.6));
+                    uiCell.getChildren().add(sockImage);
+                    uiCell.setAlignment(sockImage,Pos.CENTER);
                 }
 
                 if (backendCell instanceof DoorCell) {
