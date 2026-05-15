@@ -438,7 +438,9 @@ public class Main extends Application {
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
                     gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
-                    gameAlert.setContentText(activeMonster.getName() + " Won!!");
+                    gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
+                     + myGame.getPlayer().getName() + "'s energy: " + myGame.getPlayer().getEnergy() + "\n"
+                    +  myGame.getOpponent().getName() + "'s energy: " +  myGame.getOpponent().getEnergy()  );
                     gameAlert.getButtonTypes().setAll(gameQuit, mainMenu);
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
@@ -615,7 +617,9 @@ public class Main extends Application {
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
                     gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
-                    gameAlert.setContentText(activeMonster.getName() + " Won!!");
+                    gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
+                     + myGame.getPlayer().getName() + "'s energy: " + myGame.getPlayer().getEnergy() + "\n"
+                    +  myGame.getOpponent().getName() + "'s energy: " +  myGame.getOpponent().getEnergy()  );
                     gameAlert.getButtonTypes().setAll(gameQuit, mainMenu);
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
@@ -642,7 +646,9 @@ public class Main extends Application {
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
                     gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
-                    gameAlert.setContentText(activeMonster.getName() + " Won!!");
+                   gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
+                     + myGame.getPlayer().getName() + "'s energy: " + myGame.getPlayer().getEnergy() + "\n"
+                    +  myGame.getOpponent().getName() + "'s energy: " +  myGame.getOpponent().getEnergy()  );
                     gameAlert.getButtonTypes().setAll( mainMenu,gameQuit);
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
