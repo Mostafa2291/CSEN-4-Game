@@ -22,7 +22,7 @@ import game.engine.cells.MonsterCell;
 import game.engine.exceptions.InvalidMoveException;
 import game.engine.exceptions.OutOfEnergyException;
 import game.engine.monsters.Monster;
-
+import game.engine.monsters.Schemer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -37,6 +37,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*; // Imports ColumnConstraints and RowConstraints automatically!
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
@@ -293,29 +294,83 @@ public class Main extends Application {
 
         // 2. Draw Player in their new position
         StackPane playerUI = new StackPane();
-        Rectangle pRect = new Rectangle(); 
-        pRect.setFill(Color.BLUEVIOLET);
+        Rectangle pRect = new Rectangle();
+        Rectangle pImage = new Rectangle();
+
+        //setting player image
+        if(myGame.getPlayer().getName().equals("Mike Wazowski")){
+            pRect.setFill(Color.GREEN);
+            ImageView playeri = new ImageView(new Image("file:Resources/Images/Mike Wazowski.jpg"));
+            pImage.setFill(new ImagePattern(playeri.getImage()));
+
+        }
+        else if(myGame.getPlayer().getName().equals("James P. Sullivan")){
+            pRect.setFill(Color.BLUE);
+            ImageView playeri = new ImageView(new Image("file:Resources/Images/James p.Sullivan.jpg"));
+            pImage.setFill(new ImagePattern(playeri.getImage()));
+        }
+        else if(myGame.getPlayer().getName().equals("Randall Boggs")){
+            pRect.setFill(Color.PURPLE);
+                ImageView playeri = new ImageView(new Image("file:Resources/Images/Randall Boggs.jpg"));
+                pImage.setFill(new ImagePattern(playeri.getImage()));
+        }
+        else if(myGame.getPlayer().getName().equals("Celia Mae")){
+            pRect.setFill(Color.PINK);
+            ImageView playeri = new ImageView(new Image("file:Resources/Images/Celia Mae.jpg"));
+            pImage.setFill(new ImagePattern(playeri.getImage()));
+        }
+        else if(myGame.getPlayer().getName().equals("Roz")){
+            pRect.setFill(Color.GRAY);
+            ImageView playeri = new ImageView(new Image("file:Resources/Images/Roz.jpg"));
+            pImage.setFill(new ImagePattern(playeri.getImage()));
+        }
+      
+        else if(myGame.getPlayer().getName().equals("Fungus")){
+             pRect.setFill(Color.WHITE);
+            ImageView playeri = new ImageView(new Image("file:Resources/Images/Fungus.jpg"));
+            pImage.setFill(new ImagePattern(playeri.getImage()));
+        }
+         else if(myGame.getPlayer().getName().equals("Henry J.Waternoose")){
+             pRect.setFill(Color.WHITE);
+            ImageView playeri = new ImageView(new Image("file:Resources/Images/Henry J.Waternoose.jpg"));
+            pImage.setFill(new ImagePattern(playeri.getImage()));
+        }
+        else if(myGame.getPlayer().getName().equals("Yeti")){
+             pRect.setFill(Color.WHITE);
+            ImageView playeri = new ImageView(new Image("file:Resources/Images/Yeti.jpg"));
+            pImage.setFill(new ImagePattern(playeri.getImage()));
+      
+        }
+
+
+
         // ── RESPONSIVE FIX: Bind monster size to a percentage of the screen width ──
         pRect.widthProperty().bind(stage.widthProperty().multiply(0.015)); 
         pRect.heightProperty().bind(stage.widthProperty().multiply(0.015)); 
+        pImage.widthProperty().bind(stage.widthProperty().multiply(0.015));
+        pImage.heightProperty().bind(stage.widthProperty().multiply(0.015));
+    
 
         Label pEnergy = new Label(player.getEnergy() + "");
         pEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
-        playerUI.getChildren().addAll(pRect, pEnergy);
+        playerUI.getChildren().addAll(pRect, pEnergy,pImage);
         
         monsterContainers.get(player.getPosition()).getChildren().add(playerUI);
 
         // 3. Draw Opponent in their new position
         StackPane opponentUI = new StackPane();
         Rectangle oRect = new Rectangle(); 
+        Rectangle oImage = new Rectangle();
         oRect.setFill(Color.MAGENTA);
         // ── RESPONSIVE FIX: Bind monster size to a percentage of the screen width ──
         oRect.widthProperty().bind(stage.widthProperty().multiply(0.015)); 
         oRect.heightProperty().bind(stage.widthProperty().multiply(0.015)); 
+        oImage.widthProperty().bind(stage.widthProperty().multiply(0.015));
+        oImage.heightProperty().bind(stage.widthProperty().multiply(0.015));
 
         Label oEnergy = new Label(opponent.getEnergy() + "");
         oEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
-        opponentUI.getChildren().addAll(oRect, oEnergy);
+        opponentUI.getChildren().addAll(oRect, oEnergy,oImage);
         
         monsterContainers.get(opponent.getPosition()).getChildren().add(opponentUI);
 
@@ -324,6 +379,51 @@ public class Main extends Application {
 
         if (currentturnLabel != null) {
             currentturnLabel.setText("Current Turn: " + myGame.getCurrent().getName());
+
+             //setting opponent image 
+         if(myGame.getOpponent().getName().equals("Mike Wazowski")){
+            oRect.setFill(Color.GREEN);
+            ImageView opponenti = new ImageView(new Image("file:Resources/Images/Mike Wazowski.jpg"));
+            oImage.setFill(new ImagePattern(opponenti.getImage()));
+
+        }
+        else if(myGame.getOpponent().getName().equals("James P. Sullivan")){
+            oRect.setFill(Color.BLUE);
+            ImageView opponenti = new ImageView(new Image("file:Resources/Images/James p.Sullivan.jpg"));
+            oImage.setFill(new ImagePattern(opponenti.getImage()));
+        }
+        else if(myGame.getOpponent().getName().equals("Randall Boggs")){
+            oRect.setFill(Color.PURPLE);
+                ImageView opponenti = new ImageView(new Image("file:Resources/Images/Randall Boggs.jpg"));
+                oImage.setFill(new ImagePattern(opponenti.getImage()));
+        }
+        else if(myGame.getOpponent().getName().equals("Celia Mae")){
+            oRect.setFill(Color.PINK);
+            ImageView opponenti = new ImageView(new Image("file:Resources/Images/Celia Mae.jpg"));
+            oImage.setFill(new ImagePattern(opponenti.getImage()));
+        }
+        else if(myGame.getOpponent().getName().equals("Roz")){
+            oRect.setFill(Color.GRAY);
+            ImageView opponenti = new ImageView(new Image("file:Resources/Images/Roz.jpg"));
+            oImage.setFill(new ImagePattern(opponenti.getImage()));
+        }
+      
+        else if(myGame.getOpponent().getName().equals("Fungus")){
+             oRect.setFill(Color.WHITE);
+            ImageView opponenti = new ImageView(new Image("file:Resources/Images/Fungus.jpg"));
+            oImage.setFill(new ImagePattern(opponenti.getImage()));
+        }
+         else if(myGame.getOpponent().getName().equals("Henry J.Waternoose")){
+             oRect.setFill(Color.WHITE);
+            ImageView opponenti = new ImageView(new Image("file:Resources/Images/Henry J.Waternoose.jpg"));
+            oImage.setFill(new ImagePattern(opponenti.getImage()));
+        }
+        else if(myGame.getOpponent().getName().equals("Yeti")){
+             oRect.setFill(Color.WHITE);
+            ImageView opponenti = new ImageView(new Image("file:Resources/Images/Yeti.jpg"));
+            oImage.setFill(new ImagePattern(opponenti.getImage()));
+      
+        }
             
             // ── Format Player Stats ──
             String pStats = "Name: " + player.getName() + "\n\n" +
