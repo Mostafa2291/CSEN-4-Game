@@ -428,9 +428,9 @@ public class Main extends Application {
 
         laugher.setOnAction(e -> {
             try{
-                if (menuMusicPlayer != null) menuMusicPlayer.stop(); // Stop menu music
+                if (menuMusicPlayer != null) menuMusicPlayer.stop(); 
                 if (gameMusicPlayer != null) {
-                    gameMusicPlayer.seek(Duration.ZERO); // Restart game track
+                    gameMusicPlayer.seek(Duration.ZERO); 
                     gameMusicPlayer.play();
                 }
                 
@@ -444,9 +444,9 @@ public class Main extends Application {
 
         scarer.setOnAction(e ->{
              try{
-                if (menuMusicPlayer != null) menuMusicPlayer.stop(); // Stop menu music
+                if (menuMusicPlayer != null) menuMusicPlayer.stop(); 
                 if (gameMusicPlayer != null) {
-                    gameMusicPlayer.seek(Duration.ZERO); // Restart game track
+                    gameMusicPlayer.seek(Duration.ZERO); 
                     gameMusicPlayer.play();
                 }
                 
@@ -482,6 +482,10 @@ public class Main extends Application {
 
         pane.setStyle("-fx-background-color: " + cssColor + "; -fx-border-color: black; -fx-border-width: 0.5px;");
         pane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        
+        // ── BUG FIX: This completely stops the cells from stretching to fit the images! ──
+        pane.setMinSize(0, 0); 
+        
         return pane;
     }
 
@@ -727,8 +731,11 @@ public class Main extends Application {
                     String chosenPath = availableImages.get(rand.nextInt(availableImages.size()));
                     Image chosen = new Image(chosenPath);
                     ImageView monsterImage = new ImageView(chosen);
-                    monsterImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.6));
-                    monsterImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.6));
+                    
+                    // ── BUG FIX: Bind image size to the GRID width, not the CELL width ──
+                    monsterImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.6));
+                    monsterImage.fitHeightProperty().bind(grid.heightProperty().divide(Constants.BOARD_ROWS).multiply(0.6));
+                    
                     uiCell.getChildren().add(monsterImage);
                     uiCell.setAlignment(monsterImage, Pos.CENTER);
                     availableImages.remove(chosenPath);
@@ -736,24 +743,33 @@ public class Main extends Application {
 
                 if(backendCell instanceof CardCell){
                     ImageView cardImage = new ImageView(new Image("file:Resources/Images/Card.jpg"));
-                    cardImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.6));
-                    cardImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.6));
+                    
+                    // ── BUG FIX: Bind image size to the GRID width, not the CELL width ──
+                    cardImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.6));
+                    cardImage.fitHeightProperty().bind(grid.heightProperty().divide(Constants.BOARD_ROWS).multiply(0.6));
+                    
                     uiCell.getChildren().add(cardImage);
                     uiCell.setAlignment(cardImage,Pos.CENTER);
                 }
 
                 if(backendCell instanceof ConveyorBelt){
                     ImageView conveyorImage = new ImageView(new Image("file:Resources/Images/Conveyer.jpg"));
-                    conveyorImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.6));
-                    conveyorImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.6));
+                    
+                    // ── BUG FIX: Bind image size to the GRID width, not the CELL width ──
+                    conveyorImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.6));
+                    conveyorImage.fitHeightProperty().bind(grid.heightProperty().divide(Constants.BOARD_ROWS).multiply(0.6));
+                    
                     uiCell.getChildren().add(conveyorImage);
                     uiCell.setAlignment(conveyorImage,Pos.CENTER);
                 }
                 
                 if(backendCell instanceof ContaminationSock){
                     ImageView sockImage = new ImageView(new Image("file:Resources/Images/Sock.jpg"));
-                    sockImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.6));
-                    sockImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.6));
+                    
+                    // ── BUG FIX: Bind image size to the GRID width, not the CELL width ──
+                    sockImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.6));
+                    sockImage.fitHeightProperty().bind(grid.heightProperty().divide(Constants.BOARD_ROWS).multiply(0.6));
+                    
                     uiCell.getChildren().add(sockImage);
                     uiCell.setAlignment(sockImage,Pos.CENTER);
                 }
@@ -766,8 +782,9 @@ public class Main extends Application {
                     
                     ImageView closedDoorImage = new ImageView(new Image("file:Resources/Images/closed door.jpeg"));
                     
-                    closedDoorImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.3));
-                    closedDoorImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.3));
+                    // ── BUG FIX: Bind image size to the GRID width, not the CELL width ──
+                    closedDoorImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.3));
+                    closedDoorImage.fitHeightProperty().bind(grid.heightProperty().divide(Constants.BOARD_ROWS).multiply(0.3));
                     
                     uiCell.getChildren().add(closedDoorImage);
                     uiCell.setAlignment(closedDoorImage,Pos.BOTTOM_RIGHT);
