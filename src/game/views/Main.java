@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Optional;
 
-// Animation & Audio Imports
+// Animation & Audio & Video Imports
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 import javafx.util.Duration;
 
 import javafx.scene.input.KeyCode;
@@ -60,7 +61,6 @@ public class Main extends Application {
     private Label opponentStatusLabel;
     private Scene mainMenuScene;
     
-    // ── CHANGED TO STACKPANE SO WE CAN PIN THE MUSIC BUTTON TO THE CORNER ──
     private StackPane layout; 
     
     private double screenWidth;
@@ -68,9 +68,10 @@ public class Main extends Application {
     private static Stage stage;
     private static Game myGame;
     
-    // Global Music Players
+    // Global Music & Video Players
     private static MediaPlayer menuMusicPlayer;
     private static MediaPlayer gameMusicPlayer;
+    private static MediaPlayer videoPlayer;
 
     public static void main(String[] args) {
         launch(args);
@@ -110,8 +111,8 @@ public class Main extends Application {
             String menuMusicPath = new java.io.File("Resources/Audio/menu_music.wav").getAbsolutePath();
             Media menuMedia = new Media(new java.io.File(menuMusicPath).toURI().toString());
             menuMusicPlayer = new MediaPlayer(menuMedia);
-            menuMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop forever
-            menuMusicPlayer.setVolume(0.3); // 30% volume
+            menuMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE); 
+            menuMusicPlayer.setVolume(0.3); 
             menuMusicPlayer.play();
         } catch (Throwable ex) {
             System.out.println("Menu music failed to load. Ensure menu_music.wav is in Resources/Audio/");
@@ -121,8 +122,8 @@ public class Main extends Application {
             String gameMusicPath = new java.io.File("Resources/Audio/game_music.wav").getAbsolutePath();
             Media gameMedia = new Media(new java.io.File(gameMusicPath).toURI().toString());
             gameMusicPlayer = new MediaPlayer(gameMedia);
-            gameMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop forever
-            gameMusicPlayer.setVolume(0.3); // 30% volume
+            gameMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE); 
+            gameMusicPlayer.setVolume(0.3); 
         } catch (Throwable ex) {
             System.out.println("Game music failed to load. Ensure game_music.wav is in Resources/Audio/");
         }
@@ -137,19 +138,72 @@ public class Main extends Application {
         });
 
         // ── Main Menu ─────────────────────────────────────────────────────────
-        // 1. Put the main buttons in a standard vertical box
         VBox menuButtons = new VBox(15);
         menuButtons.setAlignment(Pos.CENTER);
         menuButtons.getChildren().addAll(start, instructions, quit);
         
-        // 2. Wrap everything in a StackPane so we can position items freely
         layout = new StackPane();
         
-        // Pin the music button to the bottom left corner
         StackPane.setAlignment(toggleMusicBtn, Pos.BOTTOM_LEFT);
         StackPane.setMargin(toggleMusicBtn, new Insets(20));
+
+        // ── EASTER EGG VIDEO SETUP ──
+        Button whatIsThisBtn = new Button("what is this");
+        whatIsThisBtn.setStyle("-fx-font-size: 10px; -fx-padding: 5px;");
+        StackPane.setAlignment(whatIsThisBtn, Pos.BOTTOM_RIGHT);
+        StackPane.setMargin(whatIsThisBtn, new Insets(20));
+
+        StackPane videoOverlay = new StackPane();
+        videoOverlay.setStyle("-fx-background-color: black;");
+        videoOverlay.setVisible(false);
+
+        MediaView videoView = new MediaView();
+        videoView.fitWidthProperty().bind(layout.widthProperty().multiply(0.8));
+        videoView.fitHeightProperty().bind(layout.heightProperty().multiply(0.8));
+        videoView.setPreserveRatio(true);
+
+        Button closeVideoBtn = new Button("Close Video");
+        closeVideoBtn.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        StackPane.setAlignment(closeVideoBtn, Pos.TOP_RIGHT);
+        StackPane.setMargin(closeVideoBtn, new Insets(20));
+
+        videoOverlay.getChildren().addAll(videoView, closeVideoBtn);
+
+        whatIsThisBtn.setOnAction(e -> {
+            try {
+                if (menuMusicPlayer != null) menuMusicPlayer.pause();
+                
+                String videoPath = new java.io.File("Resources/Video/whatisthis.mp4").getAbsolutePath();
+                Media videoMedia = new Media(new java.io.File(videoPath).toURI().toString());
+                
+                if (videoPlayer != null) {
+                    videoPlayer.stop();
+                }
+                
+                videoPlayer = new MediaPlayer(videoMedia);
+                videoView.setMediaPlayer(videoPlayer);
+                videoOverlay.setVisible(true);
+                videoPlayer.play();
+
+                // Auto-close when the video finishes
+                videoPlayer.setOnEndOfMedia(() -> {
+                    videoOverlay.setVisible(false);
+                    if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play();
+                });
+
+            } catch (Exception ex) {
+                System.out.println("Video failed to load. Make sure whatisthis.mp4 is inside Resources/Video/");
+            }
+        });
+
+        closeVideoBtn.setOnAction(e -> {
+            if (videoPlayer != null) videoPlayer.stop();
+            videoOverlay.setVisible(false);
+            if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play();
+        });
         
-        layout.getChildren().addAll(menuButtons, toggleMusicBtn);
+        // Add all elements to the Main Menu layout
+        layout.getChildren().addAll(menuButtons, toggleMusicBtn, whatIsThisBtn, videoOverlay);
         
         BackgroundImage menuBG = new BackgroundImage(
             new Image("file:Resources/Images/background2.jpg"),
@@ -223,7 +277,6 @@ public class Main extends Application {
         continuePrompt.setLayoutX(20);
         continuePrompt.layoutYProperty().bind(stage.heightProperty().subtract(80));
 
-        // Add back button to instructions so they can click it directly
         backInstructions.setLayoutX(20);
         backInstructions.setLayoutY(20);
 
