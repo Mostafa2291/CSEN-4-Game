@@ -3,10 +3,9 @@ package game.views;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.Arrays;
 import java.util.Optional;
 
-// Added for Instructions Cutscene
+// Animation & Audio Imports
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.media.Media;
@@ -29,7 +28,6 @@ import game.engine.cells.MonsterCell;
 import game.engine.exceptions.InvalidMoveException;
 import game.engine.exceptions.OutOfEnergyException;
 import game.engine.monsters.Monster;
-import game.engine.monsters.Schemer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -38,11 +36,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.*; 
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
@@ -60,9 +57,15 @@ public class Main extends Application {
     private Label playerStatusLabel;
     private Label opponentStatusLabel;
     private Scene mainMenuScene;
-    private VBox layout;
+    
+    // ── CHANGED TO STACKPANE SO WE CAN PIN THE MUSIC BUTTON TO THE CORNER ──
+    private StackPane layout; 
+    
     private static Stage stage;
     private static Game myGame;
+    
+    // Global Menu Music Player
+    private static MediaPlayer menuMusicPlayer;
 
     public static void main(String[] args) {
         launch(args);
@@ -70,7 +73,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        this.stage = stage;
+        Main.stage = stage;
 
         // ── Shared background size ────────────────────────────────────────────
         BackgroundSize bSize = new BackgroundSize(1.0, 1.0, true, true, false, true);
@@ -84,20 +87,55 @@ public class Main extends Application {
         Button back             = new Button("Go Back");
         Button instructions     = new Button("Instructions");
         Button backInstructions = new Button("Go back to main menu");
+        
+        // Music Toggle Button
+        Button toggleMusicBtn   = new Button("🔊 Mute Music");
 
         // Padding
         start.setPadding(new Insets(10));
         quit.setPadding(new Insets(10));
         controls.setPadding(new Insets(10));
         instructions.setPadding(new Insets(10));
+        toggleMusicBtn.setPadding(new Insets(10));
         back.setPadding(new Insets(10, 20, 10, 20));
         backInstructions.setPadding(new Insets(10, 20, 10, 20));
 
-        // ── Main Menu ─────────────────────────────────────────────────────────
-        layout = new VBox(15);
-        layout.setAlignment(Pos.CENTER);
-        layout.getChildren().addAll(start, instructions, quit);
+        // ── LOAD MENU MUSIC ───────────────────────────────────────────────────
+        try {
+            String musicPath = new java.io.File("Resources/Audio/menu_music.wav").getAbsolutePath();
+            Media musicMedia = new Media(new java.io.File(musicPath).toURI().toString());
+            menuMusicPlayer = new MediaPlayer(musicMedia);
+            menuMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop forever
+            menuMusicPlayer.setVolume(0.3); // 30% volume so it's a nice background track
+            menuMusicPlayer.play();
+        } catch (Throwable ex) {
+            System.out.println("Menu music failed to load. Ensure menu_music.wav is in Resources/Audio/");
+        }
 
+        // Toggle Music Action
+        toggleMusicBtn.setOnAction(e -> {
+            if (menuMusicPlayer != null) {
+                boolean isMuted = menuMusicPlayer.isMute();
+                menuMusicPlayer.setMute(!isMuted);
+                toggleMusicBtn.setText(!isMuted ? "🔇 Unmute Music" : "🔊 Mute Music");
+            }
+        });
+
+        // ── Main Menu ─────────────────────────────────────────────────────────
+        // 1. Put the main buttons in a standard vertical box
+        VBox menuButtons = new VBox(15);
+        menuButtons.setAlignment(Pos.CENTER);
+        menuButtons.getChildren().addAll(start, instructions, quit);
+        
+        // 2. Wrap everything in a StackPane so we can position items freely
+        layout = new StackPane();
+        
+        // Pin the music button to the bottom left corner
+        StackPane.setAlignment(toggleMusicBtn, Pos.BOTTOM_LEFT);
+        StackPane.setMargin(toggleMusicBtn, new Insets(20));
+        
+        layout.getChildren().addAll(menuButtons, toggleMusicBtn);
+        
         BackgroundImage menuBG = new BackgroundImage(
             new Image("file:Resources/Images/background2.jpg"),
             BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
@@ -108,7 +146,6 @@ public class Main extends Application {
         // ── Role Select Screen ────────────────────────────────────────────────
         StackPane roleSelectRoot = new StackPane();
 
-        // Split background: laugher left, scarer right
         HBox backgroundSplitter = new HBox(0);
         Pane leftPane  = new Pane();
         Pane rightPane = new Pane();
@@ -140,13 +177,11 @@ public class Main extends Application {
         Pane interactiveInstructionPane = new Pane();
         interactiveInstructionPane.setStyle("-fx-background-color: black;");
 
-        // 1. The Background Image
         ImageView instBg = new ImageView(new Image("file:Resources/Images/mike_sulley.jpg"));
         instBg.fitWidthProperty().bind(stage.widthProperty());
         instBg.fitHeightProperty().bind(stage.heightProperty());
         instBg.setPreserveRatio(false);
 
-        // 2. Sulley's Speech Bubble (Positioned Top-Left)
         Label sulleyBubble = new Label();
         sulleyBubble.setStyle("-fx-background-color: white; -fx-padding: 20px; -fx-background-radius: 20px; -fx-border-radius: 20px; -fx-border-color: #333; -fx-border-width: 4px; -fx-font-size: 18px; -fx-font-weight: bold;");
         sulleyBubble.setWrapText(true);
@@ -155,7 +190,6 @@ public class Main extends Application {
         sulleyBubble.layoutYProperty().bind(stage.heightProperty().multiply(0.10));
         sulleyBubble.setVisible(false);
 
-        // 3. Mike's Speech Bubble (Positioned Middle-Right)
         Label mikeBubble = new Label();
         mikeBubble.setStyle("-fx-background-color: white; -fx-padding: 20px; -fx-background-radius: 20px; -fx-border-radius: 20px; -fx-border-color: #333; -fx-border-width: 4px; -fx-font-size: 18px; -fx-font-weight: bold;");
         mikeBubble.setWrapText(true);
@@ -164,16 +198,18 @@ public class Main extends Application {
         mikeBubble.layoutYProperty().bind(stage.heightProperty().multiply(0.40));
         mikeBubble.setVisible(false);
 
-        // 4. The Enter Prompt
         Label continuePrompt = new Label("Press [ENTER] to continue... Press [ESC] to skip");
         continuePrompt.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; -fx-background-color: rgba(0,0,0,0.6); -fx-padding: 10px;");
         continuePrompt.setLayoutX(20);
         continuePrompt.layoutYProperty().bind(stage.heightProperty().subtract(80));
 
-        interactiveInstructionPane.getChildren().addAll(instBg, sulleyBubble, mikeBubble, continuePrompt);
-        Scene instructionScene = new Scene(interactiveInstructionPane, 800, 600);
+        // Add back button to instructions so they can click it directly
+        backInstructions.setLayoutX(20);
+        backInstructions.setLayoutY(20);
 
-        // 5. The Dialogue Script
+        interactiveInstructionPane.getChildren().addAll(instBg, sulleyBubble, mikeBubble, continuePrompt);
+        Scene instructionScene = new Scene(interactiveInstructionPane, 1000, 800);
+
         String[][] dialogues = {
             {"MIKE", "Welcome to DooR DasH: Scare vs Laugh Touchdown! 👾⚡"},
             {"SULLEY", "Step onto the Floor of Monstropolis... reach Boo's Door with 1000 energy before your rival does."},
@@ -183,12 +219,11 @@ public class Main extends Application {
             {"SULLEY", "To win, hit Boo's Door at cell 99 with 1000+ energy. Will you scare… or make them laugh?"}
         };
 
-        // 6. Animation & Audio State Variables
         int[] state = {0}; 
         boolean[] isTyping = {false};
         String[] fullCurrentText = {""};
         Timeline[] typingTimeline = {new Timeline()};
-        Random randAudio = new Random();
+        Random randAudio = new Random(); 
         
         MediaPlayer tempPlayer = null;
         try {
@@ -198,14 +233,11 @@ public class Main extends Application {
             tempPlayer.setCycleCount(MediaPlayer.INDEFINITE); 
         } catch (Throwable ex) {
             System.out.println("AUDIO FAILED TO LOAD:");
-            ex.printStackTrace();
         }
         final MediaPlayer finalMumble = tempPlayer;
 
-        // 7. The Method that plays the next dialogue line
         Runnable playNextDialogue = () -> {
             if (state[0] >= dialogues.length) {
-                // BUG FIX: Stop audio completely when dialogue ends naturally
                 if (finalMumble != null) finalMumble.stop(); 
                 stage.setScene(mainMenuScene); 
                 return;
@@ -224,7 +256,6 @@ public class Main extends Application {
 
             if (finalMumble != null) {
                 finalMumble.stop(); 
-
                 double randomStartTime = randAudio.nextDouble() * 20.0;
                 finalMumble.seek(Duration.seconds(randomStartTime));
 
@@ -255,7 +286,7 @@ public class Main extends Application {
             typingTimeline[0].play();
         };
 
-        // 8. Handle Keyboard Inputs
+        // Handle Keys for Instructions Scene
         instructionScene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 if (isTyping[0]) {
@@ -270,14 +301,13 @@ public class Main extends Application {
                 }
             } else if (event.getCode() == KeyCode.ESCAPE) {
                  typingTimeline[0].stop();
-                 // BUG FIX: Stop audio completely when skipping with ESC
                  if (finalMumble != null) finalMumble.stop(); 
                  stage.setScene(mainMenuScene);
             } 
         });
 
-        // ── Scene ─────────────────────────────────────────────────────────────
-        mainMenuScene = new Scene(layout, 800, 600);
+        // ── Scene Setup ───────────────────────────────────────────────────────
+        mainMenuScene = new Scene(layout, 1000, 800);
         stage.setTitle("DooR DasH: Scare vs Laugh");
         stage.setScene(mainMenuScene);
         stage.show();
@@ -301,13 +331,20 @@ public class Main extends Application {
         back.setOnMouseEntered(e -> back.setText("> Go Back"));
         back.setOnMouseExited(e  -> back.setText("Go Back"));
 
-        backInstructions.setOnAction(e -> stage.getScene().setRoot(layout));
+        backInstructions.setOnAction(e -> {
+            if (finalMumble != null) finalMumble.stop();
+            if (typingTimeline[0] != null) typingTimeline[0].stop();
+            stage.setScene(mainMenuScene);
+            mainMenuScene.setRoot(layout);
+        });
+
         quit.setOnAction(e -> stage.close());
         quit.setOnMouseEntered(e -> quit.setText("> Quit :("));
         quit.setOnMouseExited(e  -> quit.setText("Quit"));
 
         laugher.setOnAction(e -> {
             try{
+                if (menuMusicPlayer != null) menuMusicPlayer.pause(); // Pause menu music when game starts!
                 myGame = new Game(Role.LAUGHER);
                 System.out.println("Game loaded :D");
                 startGameBoard();
@@ -318,6 +355,7 @@ public class Main extends Application {
 
         scarer.setOnAction(e ->{
              try{
+                if (menuMusicPlayer != null) menuMusicPlayer.pause(); // Pause menu music when game starts!
                 myGame = new Game(Role.SCARER);
                 System.out.println("Game loaded :D");
                 startGameBoard();
@@ -349,7 +387,6 @@ public class Main extends Application {
         }
 
         pane.setStyle("-fx-background-color: " + cssColor + "; -fx-border-color: black; -fx-border-width: 0.5px;");
-        // ── RESPONSIVE FIX: Allow the pane to grow indefinitely instead of setting a fixed 60x60 ──
         pane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         return pane;
     }
@@ -376,6 +413,7 @@ public class Main extends Application {
 
         Monster player = myGame.getPlayer();
         Monster opponent = myGame.getOpponent();
+        
         if (doorImageViews != null && doorImageViews[player.getPosition()] != null) {
             doorImageViews[player.getPosition()].setImage(new Image("file:Resources/Images/open door.jpeg"));
         }
@@ -387,12 +425,12 @@ public class Main extends Application {
         StackPane playerUI = new StackPane();
         Rectangle pRect = new Rectangle();
         Rectangle pImage = new Rectangle();
+        
         //setting player image
         if(myGame.getPlayer().getName().equals("Mike Wazowski")){
             pRect.setFill(Color.GREEN);
             ImageView playeri = new ImageView(new Image("file:Resources/Images/Mike Wazowski.jpg"));
             pImage.setFill(new ImagePattern(playeri.getImage()));
-
         }
         else if(myGame.getPlayer().getName().equals("James P. Sullivan")){
             pRect.setFill(Color.BLUE);
@@ -402,7 +440,7 @@ public class Main extends Application {
         else if(myGame.getPlayer().getName().equals("Randall Boggs")){
             pRect.setFill(Color.PURPLE);
             ImageView playeri = new ImageView(new Image("file:Resources/Images/Randall Boggs.jpg"));
-                pImage.setFill(new ImagePattern(playeri.getImage()));
+            pImage.setFill(new ImagePattern(playeri.getImage()));
         }
         else if(myGame.getPlayer().getName().equals("Celia Mae")){
             pRect.setFill(Color.PINK);
@@ -414,7 +452,6 @@ public class Main extends Application {
             ImageView playeri = new ImageView(new Image("file:Resources/Images/Roz.jpg"));
             pImage.setFill(new ImagePattern(playeri.getImage()));
         }
-      
         else if(myGame.getPlayer().getName().equals("Fungus")){
              pRect.setFill(Color.WHITE);
              ImageView playeri = new ImageView(new Image("file:Resources/Images/Fungus.jpg"));
@@ -429,48 +466,30 @@ public class Main extends Application {
              pRect.setFill(Color.WHITE);
              ImageView playeri = new ImageView(new Image("file:Resources/Images/Yeti.jpg"));
             pImage.setFill(new ImagePattern(playeri.getImage()));
-      
         }
 
-        // ── RESPONSIVE FIX: Bind monster size to a percentage of the screen width ──
         pRect.widthProperty().bind(stage.widthProperty().multiply(0.015));
         pRect.heightProperty().bind(stage.widthProperty().multiply(0.015)); 
         pImage.widthProperty().bind(stage.widthProperty().multiply(0.015));
         pImage.heightProperty().bind(stage.widthProperty().multiply(0.015));
     
-
         Label pEnergy = new Label(player.getEnergy() + "");
         pEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
         playerUI.getChildren().addAll(pRect, pEnergy,pImage);
         
         monsterContainers.get(player.getPosition()).getChildren().add(playerUI);
+        
         // 3. Draw Opponent in their new position
         StackPane opponentUI = new StackPane();
         Rectangle oRect = new Rectangle(); 
         Rectangle oImage = new Rectangle();
         oRect.setFill(Color.MAGENTA);
-        // ── RESPONSIVE FIX: Bind monster size to a percentage of the screen width ──
-        oRect.widthProperty().bind(stage.widthProperty().multiply(0.015));
-        oRect.heightProperty().bind(stage.widthProperty().multiply(0.015)); 
-        oImage.widthProperty().bind(stage.widthProperty().multiply(0.015));
-        oImage.heightProperty().bind(stage.widthProperty().multiply(0.015));
-
-        Label oEnergy = new Label(opponent.getEnergy() + "");
-        oEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
-        opponentUI.getChildren().addAll(oRect, oEnergy,oImage);
         
-        monsterContainers.get(opponent.getPosition()).getChildren().add(opponentUI);
-        previousPlayerPos = player.getPosition();
-        previousOpponentPos = opponent.getPosition();
-
-        if (currentturnLabel != null) {
-            currentturnLabel.setText("Current Turn: " + myGame.getCurrent().getName());
-            //setting opponent image 
-         if(myGame.getOpponent().getName().equals("Mike Wazowski")){
+        //setting opponent image 
+        if(myGame.getOpponent().getName().equals("Mike Wazowski")){
             oRect.setFill(Color.GREEN);
             ImageView opponenti = new ImageView(new Image("file:Resources/Images/Mike Wazowski.jpg"));
             oImage.setFill(new ImagePattern(opponenti.getImage()));
-
         }
         else if(myGame.getOpponent().getName().equals("James P. Sullivan")){
             oRect.setFill(Color.BLUE);
@@ -480,7 +499,7 @@ public class Main extends Application {
         else if(myGame.getOpponent().getName().equals("Randall Boggs")){
             oRect.setFill(Color.PURPLE);
             ImageView opponenti = new ImageView(new Image("file:Resources/Images/Randall Boggs.jpg"));
-                oImage.setFill(new ImagePattern(opponenti.getImage()));
+            oImage.setFill(new ImagePattern(opponenti.getImage()));
         }
         else if(myGame.getOpponent().getName().equals("Celia Mae")){
             oRect.setFill(Color.PINK);
@@ -492,7 +511,6 @@ public class Main extends Application {
             ImageView opponenti = new ImageView(new Image("file:Resources/Images/Roz.jpg"));
             oImage.setFill(new ImagePattern(opponenti.getImage()));
         }
-      
         else if(myGame.getOpponent().getName().equals("Fungus")){
              oRect.setFill(Color.WHITE);
              ImageView opponenti = new ImageView(new Image("file:Resources/Images/Fungus.jpg"));
@@ -507,8 +525,24 @@ public class Main extends Application {
              oRect.setFill(Color.WHITE);
              ImageView opponenti = new ImageView(new Image("file:Resources/Images/Yeti.jpg"));
             oImage.setFill(new ImagePattern(opponenti.getImage()));
-      
         }
+
+        oRect.widthProperty().bind(stage.widthProperty().multiply(0.015));
+        oRect.heightProperty().bind(stage.widthProperty().multiply(0.015)); 
+        oImage.widthProperty().bind(stage.widthProperty().multiply(0.015));
+        oImage.heightProperty().bind(stage.widthProperty().multiply(0.015));
+
+        Label oEnergy = new Label(opponent.getEnergy() + "");
+        oEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
+        opponentUI.getChildren().addAll(oRect, oEnergy,oImage);
+        
+        monsterContainers.get(opponent.getPosition()).getChildren().add(opponentUI);
+        
+        previousPlayerPos = player.getPosition();
+        previousOpponentPos = opponent.getPosition();
+
+        if (currentturnLabel != null) {
+            currentturnLabel.setText("Current Turn: " + myGame.getCurrent().getName());
             
             // ── Format Player Stats ──
             String pStats = "Name: " + player.getName() + "\n\n" +
@@ -550,17 +584,17 @@ public class Main extends Application {
         availableImages.add("file:Resources/Images/James p.Sullivan.jpg");
         availableImages.add("file:Resources/Images/Randall Boggs.jpg");
         availableImages.add("file:Resources/Images/Celia Mae.jpg");
+        
         String pName = myGame.getPlayer().getName();
         String oName = myGame.getOpponent().getName();
-        String pFile = pName.equals("James P. Sullivan") ?
-        "James p.sullivan" : 
+        String pFile = pName.equals("James P. Sullivan") ? "James p.sullivan" : 
                        (pName.equals("Henry J. Waternoose") ? "Henry J.Waternoose" : pName);
         String oFile = oName.equals("James P. Sullivan") ? "James p.sullivan" : 
                        (oName.equals("Henry J. Waternoose") ? "Henry J.Waternoose" : oName);
+                       
         availableImages.remove("file:Resources/Images/" + pFile + ".jpg");
         availableImages.remove("file:Resources/Images/" + oFile + ".jpg");
         
-        // ── RESPONSIVE FIX: Apply percentage constraints to the Grid!
         for (int i = 0; i < Constants.BOARD_COLS; i++) {
             ColumnConstraints colConst = new ColumnConstraints();
             colConst.setPercentWidth(100.0 / Constants.BOARD_COLS);
@@ -595,17 +629,16 @@ public class Main extends Application {
                 uiCell.getChildren().add(numberLabel);
 
                 if(backendCell instanceof MonsterCell){
-                            Random rand = new Random();
-                            String chosenPath = availableImages.get(rand.nextInt(availableImages.size()));
-                            Image chosen = new Image(chosenPath);
-                            ImageView monsterImage = new ImageView(chosen);
-                            monsterImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.6));
-                            monsterImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.6));
-                            uiCell.getChildren().add(monsterImage);
-                            uiCell.setAlignment(monsterImage, Pos.CENTER);
-                            availableImages.remove(chosenPath);
+                    Random rand = new Random();
+                    String chosenPath = availableImages.get(rand.nextInt(availableImages.size()));
+                    Image chosen = new Image(chosenPath);
+                    ImageView monsterImage = new ImageView(chosen);
+                    monsterImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.6));
+                    monsterImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.6));
+                    uiCell.getChildren().add(monsterImage);
+                    uiCell.setAlignment(monsterImage, Pos.CENTER);
+                    availableImages.remove(chosenPath);
                 }
-                
 
                 if(backendCell instanceof CardCell){
                     ImageView cardImage = new ImageView(new Image("file:Resources/Images/Card.jpg"));
@@ -622,6 +655,7 @@ public class Main extends Application {
                     uiCell.getChildren().add(conveyorImage);
                     uiCell.setAlignment(conveyorImage,Pos.CENTER);
                 }
+                
                 if(backendCell instanceof ContaminationSock){
                     ImageView sockImage = new ImageView(new Image("file:Resources/Images/Sock.jpg"));
                     sockImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.6));
@@ -635,14 +669,16 @@ public class Main extends Application {
                     energyLabel.setStyle("-fx-font-size: 10px;");
                     StackPane.setAlignment(energyLabel, Pos.CENTER);
                     uiCell.getChildren().add(energyLabel);
-                        ImageView closedDoorImage = new ImageView(new Image("file:Resources/Images/closed door.jpeg"));
-                        closedDoorImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.3));
-                        closedDoorImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.3));
-                        uiCell.getChildren().add(closedDoorImage);
-                        uiCell.setAlignment(closedDoorImage,Pos.BOTTOM_RIGHT);
-                        doorImageViews[index] = closedDoorImage;
+                    
+                    ImageView closedDoorImage = new ImageView(new Image("file:Resources/Images/closed door.jpeg"));
+                    
+                    closedDoorImage.fitWidthProperty().bind(uiCell.widthProperty().multiply(0.3));
+                    closedDoorImage.fitHeightProperty().bind(uiCell.widthProperty().multiply(0.3));
+                    
+                    uiCell.getChildren().add(closedDoorImage);
+                    uiCell.setAlignment(closedDoorImage,Pos.BOTTOM_RIGHT);
+                    doorImageViews[index] = closedDoorImage;
                 }
-            
 
                 HBox charactersBox = new HBox(5);
                 charactersBox.setAlignment(Pos.BOTTOM_CENTER);
@@ -651,7 +687,7 @@ public class Main extends Application {
 
                 int gridRow = (Constants.BOARD_ROWS - 1) - row;
                 grid.add(uiCell, col, gridRow);
-        }
+            }
         }
       
         // ── BUTTON CONTROLS ──
@@ -665,43 +701,32 @@ public class Main extends Application {
                 Monster activeMonster = myGame.getCurrent();
                 Boolean hadShield = activeMonster.isShielded();
                 int initialE = activeMonster.getEnergy();
-                
-                
-                 
-               
+
                 myGame.playTurn();
-    
                 diceRes.setText("Rolled: " + myGame.getRoll());
 
- 
                 if(activeMonster.getPosition() == Constants.WINNING_POSITION && activeMonster.getEnergy()>= Constants.WINNING_ENERGY){
                     ButtonType mainMenu= new ButtonType("Main Menu");
                     ButtonType gameQuit = new ButtonType("Quit game :-( ");
 
-            
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
                     gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
                     gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
                      + myGame.getPlayer().getName() + "'s energy: " + myGame.getPlayer().getEnergy() + "\n"
                     +  myGame.getOpponent().getName() + "'s energy: " +  myGame.getOpponent().getEnergy()  );
-              
                     gameAlert.getButtonTypes().setAll(gameQuit, mainMenu);
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
+                        if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume music when returning to menu
                         mainMenuScene.setRoot(layout);
-                     
                         stage.setScene(mainMenuScene);
-                        stage.sizeToScene(); 
-                        stage.centerOnScreen();
                     }
                     else if(result.isPresent() && result.get() == gameQuit){
-   
                         stage.close();
                     }
                 }
-    
 
                 if(initialE>activeMonster.getEnergy()){
                     Alert damageAlert = new Alert(AlertType.INFORMATION);
@@ -710,39 +735,40 @@ public class Main extends Application {
                     damageAlert.setContentText(activeMonster.getName() + " Lost " + (initialE-activeMonster.getEnergy()) + " Energy");
                     damageAlert.showAndWait();
                 }
+                
                 if(!activeMonster.isShielded() && hadShield){
-        
                     Alert shieldAlert = new Alert(AlertType.INFORMATION);
                     shieldAlert.setTitle("Shield Alert");
                     shieldAlert.setHeaderText("You used your shield ");
                     shieldAlert.setContentText(activeMonster.getName() +" used their shield to block the negative energy effect !!");
-        
                     shieldAlert.showAndWait();
                 }
+                
                 if(myGame.getRoll() ==0 ){
                     Alert frozAlert = new Alert(AlertType.ERROR);
                     frozAlert.setTitle("FREEZE !");
-         
                     frozAlert.setHeaderText("You are Frozen !");
                     frozAlert.setContentText("Turn is skipped because you are frozen ! better luck next time :P");
                     frozAlert.showAndWait();
                 }
+                
                 if(myGame.getBoard().getCards().size()< deckSizeBefore){
                     Alert cardAlert = new Alert(AlertType.INFORMATION);
-                   
                     cardAlert.setTitle("LANDED ON CARD CELL !!");
+                    
                     if(currentCard instanceof ConfusionCard){
                         cardAlert.setHeaderText(activeMonster.getName() + " drew " + currentCard.getName() + " this is a " + currentCard.getClass().getSimpleName());
                         cardAlert.setContentText("Both monsters are confused causing them to swap roles for " + activeMonster.getConfusionTurns() + " Turns");
                     }
                     else{
-                    cardAlert.setHeaderText(activeMonster.getName() +" drew " + currentCard.getName() + " this is a " + currentCard.getClass().getSimpleName());
-                    cardAlert.setContentText("This card does the following: " + currentCard.getDescription());
+                        cardAlert.setHeaderText(activeMonster.getName() +" drew " + currentCard.getName() + " this is a " + currentCard.getClass().getSimpleName());
+                        cardAlert.setContentText("This card does the following: " + currentCard.getDescription());
                     }
                     cardAlert.showAndWait();
                 }
                
                 updateMonsters();
+                
             } catch (InvalidMoveException ex) {
                 Alert  oppLand = new Alert(AlertType.ERROR);
                 oppLand.setTitle("Invalid Move!");
@@ -751,13 +777,13 @@ public class Main extends Application {
                 oppLand.showAndWait();
             }
         });
+        
         activatePowerUpBtn.setOnAction(e -> {
             try {
                 myGame.usePowerup();
                 updateMonsters(); 
             } catch (OutOfEnergyException ex) {
                 Alert energyAlert = new Alert(AlertType.ERROR);
-                
                 energyAlert.setTitle("Energy Alert ! ");
                 energyAlert.setHeaderText("Not enough energy");
                 energyAlert.setContentText(myGame.getCurrent().getName() + " doesnt have enough energy to activate powerup :-( ");
@@ -765,8 +791,8 @@ public class Main extends Application {
             }
         });
 
-// ── CUSTOM PAUSE MENU OVERLAY ──
-        VBox pauseOverlay = new VBox();
+        // ── CUSTOM PAUSE MENU OVERLAY ──
+        VBox pauseOverlay  = new VBox();
         pauseOverlay.setAlignment(Pos.CENTER);
         pauseOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.6);"); 
         pauseOverlay.setVisible(false); 
@@ -787,9 +813,9 @@ public class Main extends Application {
         pauseMenuBox.getChildren().addAll(pauseTitle, resumeBtn, quitToMenuBtn);
         pauseOverlay.getChildren().add(pauseMenuBox);
 
-     
         resumeBtn.setOnAction(e -> pauseOverlay.setVisible(false)); 
         quitToMenuBtn.setOnAction(e -> {
+            if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume music when returning to menu!
             pauseOverlay.setVisible(false); 
             mainMenuScene.setRoot(layout);
             stage.setScene(mainMenuScene);
@@ -800,16 +826,13 @@ public class Main extends Application {
         controlsBox.setPadding(new Insets(10));
         controlsBox.getChildren().addAll(rollDiceBtn, activatePowerUpBtn);
 
- 
         // ── FINAL LAYOUT ──
         BorderPane root = new BorderPane();
         root.setCenter(grid);
         root.setBottom(controlsBox);
 
-        // 1. Create Left Sidebar for Player
         VBox leftSidebar = new VBox(10);
         leftSidebar.setPadding(new Insets(15));
-        // ── RESPONSIVE FIX: Bind width to 20% of the entire window ──
         leftSidebar.prefWidthProperty().bind(root.widthProperty().multiply(0.20));
         leftSidebar.setStyle("-fx-background-color: #e0f7fa; -fx-border-color: lightgray; -fx-border-width: 0 1 0 0;");
         Label pTitle = new Label("🎮 PLAYER");
@@ -818,10 +841,9 @@ public class Main extends Application {
         playerStatusLabel.setStyle("-fx-font-size: 14px; -fx-line-spacing: 5px;");
         playerStatusLabel.setWrapText(true);
         leftSidebar.getChildren().addAll(pTitle, playerStatusLabel);
-        // 2. Create Right Sidebar for Opponent
+        
         VBox rightSidebar = new VBox(10);
         rightSidebar.setPadding(new Insets(15));
-        // ── RESPONSIVE FIX: Bind width to 20% of the entire window ──
         rightSidebar.prefWidthProperty().bind(root.widthProperty().multiply(0.20));
         rightSidebar.setStyle("-fx-background-color: #fce4ec; -fx-border-color: lightgray; -fx-border-width: 0 0 0 1;");
         Label oTitle = new Label("👾 OPPONENT");
@@ -830,7 +852,7 @@ public class Main extends Application {
         opponentStatusLabel.setStyle("-fx-font-size: 14px; -fx-line-spacing: 5px;");
         opponentStatusLabel.setWrapText(true);
         rightSidebar.getChildren().addAll(oTitle, opponentStatusLabel);
-        // 3. Create Top Bar for Turn and Dice Roll
+        
         VBox topCenterBox = new VBox(5);
         topCenterBox.setAlignment(Pos.CENTER);
         topCenterBox.setPadding(new Insets(10));
@@ -840,29 +862,30 @@ public class Main extends Application {
         diceRes.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: darkred;");
         topCenterBox.getChildren().addAll(currentturnLabel, diceRes);
 
-        // 4. Attach everything to the BorderPane
         root.setLeft(leftSidebar);
         root.setRight(rightSidebar);
         root.setTop(topCenterBox);
+        
         StackPane basePane = new StackPane();
-        basePane.getChildren().addAll(root,pauseOverlay);
+        basePane.getChildren().addAll(root, pauseOverlay);
+        
         Scene boardScene = new Scene(basePane, 1000, 800);
         stage.setScene(boardScene);
-        // ── CHEAT CODES ──
+        
+        // ── CHEAT CODES & PAUSE TOGGLE ──
         boardScene.setOnKeyPressed(event -> {
             Monster activeMonster = myGame.getCurrent();
+            
             if (event.getCode() == KeyCode.W) {
                 myGame.getCurrent().setPosition(99);
                 System.out.println("CHEAT ACTIVATED: Teleported to Cell 99!");
                 updateMonsters(); 
 
- 
                 if(activeMonster.getPosition() == Constants.WINNING_POSITION && activeMonster.getEnergy()>= Constants.WINNING_ENERGY){
                     ButtonType mainMenu= new ButtonType("Main Menu");
                     ButtonType gameQuit = new ButtonType("Quit game :-( ");
 
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
-     
                     gameAlert.setTitle("Game over");
                     gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
                     gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
@@ -872,10 +895,9 @@ public class Main extends Application {
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
+                        if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume music when returning to menu
                         mainMenuScene.setRoot(layout);
                         stage.setScene(mainMenuScene);
-                        stage.sizeToScene(); 
-                        stage.centerOnScreen();
                     }
                     else if(result.isPresent() && result.get() == gameQuit){
                         stage.close();
@@ -894,20 +916,16 @@ public class Main extends Application {
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
                     gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
-                   
                     gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
                      + myGame.getPlayer().getName() + "'s energy: " + myGame.getPlayer().getEnergy() + "\n"
                     +  myGame.getOpponent().getName() + "'s energy: " +  myGame.getOpponent().getEnergy()  );
                     gameAlert.getButtonTypes().setAll( mainMenu,gameQuit);
-             
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
+                        if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume music when returning to menu
                         mainMenuScene.setRoot(layout);
                         stage.setScene(mainMenuScene);
-                 
-                        stage.sizeToScene(); 
-                        stage.centerOnScreen();
                     }
                     else if(result.isPresent() && result.get() == gameQuit){
                         stage.close();
@@ -917,8 +935,8 @@ public class Main extends Application {
             else if (event.getCode() == KeyCode.ESCAPE){
                 pauseOverlay.setVisible(!pauseOverlay.isVisible());
             }
-           
         });
+
         // Call update monsters for initial starting pos 
         updateMonsters();
     }
