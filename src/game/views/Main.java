@@ -31,6 +31,7 @@ import game.engine.monsters.Monster;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -43,6 +44,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -61,11 +63,14 @@ public class Main extends Application {
     // ── CHANGED TO STACKPANE SO WE CAN PIN THE MUSIC BUTTON TO THE CORNER ──
     private StackPane layout; 
     
+    private double screenWidth;
+    private double screenHeight;
     private static Stage stage;
     private static Game myGame;
     
-    // Global Menu Music Player
+    // Global Music Players
     private static MediaPlayer menuMusicPlayer;
+    private static MediaPlayer gameMusicPlayer;
 
     public static void main(String[] args) {
         launch(args);
@@ -100,19 +105,29 @@ public class Main extends Application {
         back.setPadding(new Insets(10, 20, 10, 20));
         backInstructions.setPadding(new Insets(10, 20, 10, 20));
 
-        // ── LOAD MENU MUSIC ───────────────────────────────────────────────────
+        // ── LOAD MENU & GAME MUSIC ────────────────────────────────────────────
         try {
-            String musicPath = new java.io.File("Resources/Audio/menu_music.wav").getAbsolutePath();
-            Media musicMedia = new Media(new java.io.File(musicPath).toURI().toString());
-            menuMusicPlayer = new MediaPlayer(musicMedia);
+            String menuMusicPath = new java.io.File("Resources/Audio/menu_music.wav").getAbsolutePath();
+            Media menuMedia = new Media(new java.io.File(menuMusicPath).toURI().toString());
+            menuMusicPlayer = new MediaPlayer(menuMedia);
             menuMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop forever
-            menuMusicPlayer.setVolume(0.3); // 30% volume so it's a nice background track
+            menuMusicPlayer.setVolume(0.3); // 30% volume
             menuMusicPlayer.play();
         } catch (Throwable ex) {
             System.out.println("Menu music failed to load. Ensure menu_music.wav is in Resources/Audio/");
         }
+        
+        try {
+            String gameMusicPath = new java.io.File("Resources/Audio/game_music.wav").getAbsolutePath();
+            Media gameMedia = new Media(new java.io.File(gameMusicPath).toURI().toString());
+            gameMusicPlayer = new MediaPlayer(gameMedia);
+            gameMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop forever
+            gameMusicPlayer.setVolume(0.3); // 30% volume
+        } catch (Throwable ex) {
+            System.out.println("Game music failed to load. Ensure game_music.wav is in Resources/Audio/");
+        }
 
-        // Toggle Music Action
+        // Toggle Menu Music Action
         toggleMusicBtn.setOnAction(e -> {
             if (menuMusicPlayer != null) {
                 boolean isMuted = menuMusicPlayer.isMute();
@@ -172,6 +187,11 @@ public class Main extends Application {
         StackPane.setMargin(back, new Insets(20));
 
         roleSelectRoot.getChildren().addAll(backgroundSplitter, roleButtons, back);
+        
+        // ── GET MONITOR DIMENSIONS ──
+        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+        screenWidth = screenBounds.getWidth() * 0.80; 
+        screenHeight = screenBounds.getHeight() * 0.80;
 
         // ── INTERACTIVE INSTRUCTIONS CUTSCENE ─────────────────────────────────
         Pane interactiveInstructionPane = new Pane();
@@ -208,7 +228,7 @@ public class Main extends Application {
         backInstructions.setLayoutY(20);
 
         interactiveInstructionPane.getChildren().addAll(instBg, sulleyBubble, mikeBubble, continuePrompt);
-        Scene instructionScene = new Scene(interactiveInstructionPane, 1000, 800);
+        Scene instructionScene = new Scene(interactiveInstructionPane, screenWidth, screenHeight);
 
         String[][] dialogues = {
             {"MIKE", "Welcome to DooR DasH: Scare vs Laugh Touchdown! 👾⚡"},
@@ -303,13 +323,24 @@ public class Main extends Application {
                  typingTimeline[0].stop();
                  if (finalMumble != null) finalMumble.stop(); 
                  stage.setScene(mainMenuScene);
-            } 
+            } else if (event.getCode() == KeyCode.F11) {
+                 stage.setFullScreen(!stage.isFullScreen());
+            }
         });
 
         // ── Scene Setup ───────────────────────────────────────────────────────
-        mainMenuScene = new Scene(layout, 1000, 800);
+        mainMenuScene = new Scene(layout, screenWidth, screenHeight);
+        
+        // F11 Toggle for Main Menu
+        mainMenuScene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.F11) {
+                stage.setFullScreen(!stage.isFullScreen());
+            }
+        });
+
         stage.setTitle("DooR DasH: Scare vs Laugh");
         stage.setScene(mainMenuScene);
+        stage.centerOnScreen(); 
         stage.show();
 
         // ── Button Actions ────────────────────────────────────────────────────
@@ -344,7 +375,12 @@ public class Main extends Application {
 
         laugher.setOnAction(e -> {
             try{
-                if (menuMusicPlayer != null) menuMusicPlayer.pause(); // Pause menu music when game starts!
+                if (menuMusicPlayer != null) menuMusicPlayer.stop(); // Stop menu music
+                if (gameMusicPlayer != null) {
+                    gameMusicPlayer.seek(Duration.ZERO); // Restart game track
+                    gameMusicPlayer.play();
+                }
+                
                 myGame = new Game(Role.LAUGHER);
                 System.out.println("Game loaded :D");
                 startGameBoard();
@@ -355,7 +391,12 @@ public class Main extends Application {
 
         scarer.setOnAction(e ->{
              try{
-                if (menuMusicPlayer != null) menuMusicPlayer.pause(); // Pause menu music when game starts!
+                if (menuMusicPlayer != null) menuMusicPlayer.stop(); // Stop menu music
+                if (gameMusicPlayer != null) {
+                    gameMusicPlayer.seek(Duration.ZERO); // Restart game track
+                    gameMusicPlayer.play();
+                }
+                
                 myGame = new Game(Role.SCARER);
                 System.out.println("Game loaded :D");
                 startGameBoard();
@@ -719,7 +760,9 @@ public class Main extends Application {
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
-                        if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume music when returning to menu
+                        if (gameMusicPlayer != null) gameMusicPlayer.stop(); // Stop game music
+                        if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume menu music
+                        
                         mainMenuScene.setRoot(layout);
                         stage.setScene(mainMenuScene);
                     }
@@ -815,7 +858,9 @@ public class Main extends Application {
 
         resumeBtn.setOnAction(e -> pauseOverlay.setVisible(false)); 
         quitToMenuBtn.setOnAction(e -> {
-            if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume music when returning to menu!
+            if (gameMusicPlayer != null) gameMusicPlayer.stop(); // Stop game music
+            if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume menu music
+            
             pauseOverlay.setVisible(false); 
             mainMenuScene.setRoot(layout);
             stage.setScene(mainMenuScene);
@@ -866,10 +911,26 @@ public class Main extends Application {
         root.setRight(rightSidebar);
         root.setTop(topCenterBox);
         
-        StackPane basePane = new StackPane();
-        basePane.getChildren().addAll(root, pauseOverlay);
+        // ── GAME MUSIC TOGGLE BUTTON ──
+        Button toggleGameMusicBtn = new Button("🔊 Mute Music");
+        toggleGameMusicBtn.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
         
-        Scene boardScene = new Scene(basePane, 1000, 800);
+        toggleGameMusicBtn.setOnAction(e -> {
+            if (gameMusicPlayer != null) {
+                boolean isMuted = gameMusicPlayer.isMute();
+                gameMusicPlayer.setMute(!isMuted);
+                toggleGameMusicBtn.setText(!isMuted ? "🔇 Unmute Music" : "🔊 Mute Music");
+            }
+        });
+        
+        StackPane basePane = new StackPane();
+        // Add the toggle button to the bottom left corner of the base pane
+        StackPane.setAlignment(toggleGameMusicBtn, Pos.BOTTOM_LEFT);
+        StackPane.setMargin(toggleGameMusicBtn, new Insets(20));
+        
+        basePane.getChildren().addAll(root, toggleGameMusicBtn, pauseOverlay);
+        
+        Scene boardScene = new Scene(basePane, screenWidth, screenHeight);
         stage.setScene(boardScene);
         
         // ── CHEAT CODES & PAUSE TOGGLE ──
@@ -895,7 +956,9 @@ public class Main extends Application {
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
-                        if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume music when returning to menu
+                        if (gameMusicPlayer != null) gameMusicPlayer.stop(); // Stop game music
+                        if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume menu music
+                        
                         mainMenuScene.setRoot(layout);
                         stage.setScene(mainMenuScene);
                     }
@@ -923,7 +986,9 @@ public class Main extends Application {
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
-                        if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume music when returning to menu
+                        if (gameMusicPlayer != null) gameMusicPlayer.stop(); // Stop game music
+                        if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume menu music
+                        
                         mainMenuScene.setRoot(layout);
                         stage.setScene(mainMenuScene);
                     }
@@ -934,6 +999,9 @@ public class Main extends Application {
             }
             else if (event.getCode() == KeyCode.ESCAPE){
                 pauseOverlay.setVisible(!pauseOverlay.isVisible());
+            }
+            else if (event.getCode() == KeyCode.F11) {
+                stage.setFullScreen(!stage.isFullScreen());
             }
         });
 
