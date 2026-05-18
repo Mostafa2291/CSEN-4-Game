@@ -74,7 +74,7 @@ public class Main extends Application {
     private double screenHeight;
     private static Stage stage;
     private static Game myGame;
-    
+
     // Global Music & Video Players
     private static MediaPlayer menuMusicPlayer;
     private static MediaPlayer gameMusicPlayer;
@@ -103,7 +103,7 @@ public class Main extends Application {
         Button back             = new Button("Go Back");
         Button instructions     = new Button("Instructions");
         Button backInstructions = new Button("Go back to main menu");
-        
+
         // Music Toggle Button
         Button toggleMusicBtn   = new Button("🔊 Mute Music");
 
@@ -133,7 +133,7 @@ public class Main extends Application {
             Media gameMedia = new Media(new java.io.File(gameMusicPath).toURI().toString());
             gameMusicPlayer = new MediaPlayer(gameMedia);
             gameMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE); 
-            gameMusicPlayer.setVolume(0.3); 
+            gameMusicPlayer.setVolume(0.3);
         } catch (Throwable ex) {
             System.out.println("Game music failed to load. Ensure game_music.wav is in Resources/Audio/");
         }
@@ -179,10 +179,10 @@ public class Main extends Application {
             videoOverlay.setVisible(false);
             if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play();
         });
-        
+
         // Add all elements to the Main Menu layout
         layout.getChildren().addAll(menuButtons, toggleMusicBtn, videoOverlay);
-        
+
         BackgroundImage menuBG = new BackgroundImage(
             new Image("file:Resources/Images/background2.jpg"),
             BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
@@ -219,7 +219,7 @@ public class Main extends Application {
         StackPane.setMargin(back, new Insets(20));
 
         roleSelectRoot.getChildren().addAll(backgroundSplitter, roleButtons, back);
-        
+
         // ── GET MONITOR DIMENSIONS ──
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         screenWidth = screenBounds.getWidth() * 0.80; 
@@ -281,7 +281,7 @@ public class Main extends Application {
             String absolutePath = new java.io.File("Resources/Audio/mumble.wav").getAbsolutePath();
             Media sound = new Media(new java.io.File(absolutePath).toURI().toString());
             tempPlayer = new MediaPlayer(sound);
-            tempPlayer.setCycleCount(MediaPlayer.INDEFINITE); 
+            tempPlayer.setCycleCount(MediaPlayer.INDEFINITE);
         } catch (Throwable ex) {
             System.out.println("AUDIO FAILED TO LOAD:");
         }
@@ -289,7 +289,8 @@ public class Main extends Application {
 
         Runnable playNextDialogue = () -> {
             if (state[0] >= dialogues.length) {
-                if (finalMumble != null) finalMumble.stop(); 
+                if (finalMumble != null) finalMumble.stop();
+                if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play(); // <-- RESUME MUSIC
                 stage.setScene(mainMenuScene); 
                 return;
             }
@@ -306,14 +307,14 @@ public class Main extends Application {
             activeBubble.setText(""); 
 
             if (finalMumble != null) {
-                finalMumble.stop(); 
+                finalMumble.stop();
                 double randomStartTime = randAudio.nextDouble() * 20.0;
                 finalMumble.seek(Duration.seconds(randomStartTime));
 
                 if (speaker.equals("MIKE")) {
-                    finalMumble.setRate(1.6); 
+                    finalMumble.setRate(1.6);
                 } else {
-                    finalMumble.setRate(1.0); 
+                    finalMumble.setRate(1.0);
                 }
                 finalMumble.play();
             }
@@ -343,16 +344,19 @@ public class Main extends Application {
                 if (isTyping[0]) {
                     typingTimeline[0].stop();
                     Label activeBubble = dialogues[state[0]][0].equals("MIKE") ? mikeBubble : sulleyBubble;
+ 
                     activeBubble.setText(fullCurrentText[0]);
                     isTyping[0] = false;
                     if (finalMumble != null) finalMumble.pause();
                 } else {
+                 
                     state[0]++;
                     playNextDialogue.run();
                 }
             } else if (event.getCode() == KeyCode.ESCAPE) {
                  typingTimeline[0].stop();
                  if (finalMumble != null) finalMumble.stop(); 
+                 if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play(); // <-- RESUME MUSIC
                  stage.setScene(mainMenuScene);
             } else if (event.getCode() == KeyCode.F11) {
                  stage.setFullScreen(!stage.isFullScreen());
@@ -361,7 +365,7 @@ public class Main extends Application {
 
         // ── Scene Setup ───────────────────────────────────────────────────────
         mainMenuScene = new Scene(layout, screenWidth, screenHeight);
-        
+
         // Main Menu Key Handlers (F11 and the Ctrl+F Easter Egg)
         mainMenuScene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F11) {
@@ -372,7 +376,7 @@ public class Main extends Application {
                 if (gameBeaten) { // Only works if they have completed a game!
                     try {
                         if (menuMusicPlayer != null) menuMusicPlayer.pause();
-                        
+                    
                         String videoPath = new java.io.File("Resources/Video/whatisthis.mp4").getAbsolutePath();
                         Media videoMedia = new Media(new java.io.File(videoPath).toURI().toString());
                         
@@ -389,8 +393,7 @@ public class Main extends Application {
                         videoPlayer.setOnEndOfMedia(() -> {
                             videoOverlay.setVisible(false);
                             if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play();
-                        });
-
+                         });
                     } catch (Exception ex) {
                         System.out.println("Video failed to load. Make sure whatisthis.mp4 is inside Resources/Video/");
                     }
@@ -411,10 +414,12 @@ public class Main extends Application {
         instructions.setOnAction(e -> {
             sulleyBubble.setVisible(false);
             mikeBubble.setVisible(false);
+            if (menuMusicPlayer != null) menuMusicPlayer.pause(); // <-- PAUSE MUSIC
             stage.setScene(instructionScene);
             state[0] = 0;
             playNextDialogue.run(); 
         });
+
         instructions.setOnMouseEntered(e -> instructions.setText("Game Instructions"));
         instructions.setOnMouseExited(e  -> instructions.setText("Instructions"));
 
@@ -425,6 +430,7 @@ public class Main extends Application {
         backInstructions.setOnAction(e -> {
             if (finalMumble != null) finalMumble.stop();
             if (typingTimeline[0] != null) typingTimeline[0].stop();
+            if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play(); // <-- RESUME MUSIC
             stage.setScene(mainMenuScene);
             mainMenuScene.setRoot(layout);
         });
@@ -437,12 +443,14 @@ public class Main extends Application {
             try{
                 if (menuMusicPlayer != null) menuMusicPlayer.stop(); 
                 if (gameMusicPlayer != null) {
+                   
                     gameMusicPlayer.seek(Duration.ZERO); 
                     gameMusicPlayer.play();
                 }
                 
                 myGame = new Game(Role.LAUGHER);
                 System.out.println("Game loaded :D");
+         
                 startGameBoard();
             } catch(IOException ex){
                 System.out.println("Failed to Load game ");
@@ -451,6 +459,7 @@ public class Main extends Application {
 
         scarer.setOnAction(e ->{
              try{
+                
                 if (menuMusicPlayer != null) menuMusicPlayer.stop(); 
                 if (gameMusicPlayer != null) {
                     gameMusicPlayer.seek(Duration.ZERO); 
@@ -464,12 +473,10 @@ public class Main extends Application {
                 System.out.println("Failed to Load game ");
             }
         } );
-
     }
 
     private StackPane createCell(Cell modelCell){
         StackPane pane = new StackPane();
-        
         String cssColor;
         if(modelCell instanceof MonsterCell){
             cssColor = "lightcoral";
@@ -486,9 +493,9 @@ public class Main extends Application {
         else if (modelCell instanceof DoorCell){
             // ── CHANGED: Cell background turns Green for Laugher doors and Red for Scarer doors! ──
             if (((DoorCell) modelCell).getRole() == Role.LAUGHER) {
-                cssColor = "palegreen"; 
+                cssColor = "palegreen";
             } else {
-                cssColor = "lightsalmon"; 
+                cssColor = "lightsalmon";
             }
         }
         else {
@@ -497,7 +504,6 @@ public class Main extends Application {
 
         pane.setStyle("-fx-background-color: " + cssColor + "; -fx-border-color: black; -fx-border-width: 0.5px;");
         pane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        
         pane.setMinSize(0, 0); 
         
         return pane;
@@ -525,7 +531,6 @@ public class Main extends Application {
 
         Monster player = myGame.getPlayer();
         Monster opponent = myGame.getOpponent();
-        
         if (doorImageViews != null && doorImageViews[player.getPosition()] != null) {
             doorImageViews[player.getPosition()].setImage(new Image("file:Resources/Images/open door.jpeg"));
         }
@@ -537,7 +542,6 @@ public class Main extends Application {
         StackPane playerUI = new StackPane();
         Rectangle pRect = new Rectangle();
         Rectangle pImage = new Rectangle();
-        
         //setting player image
         if(myGame.getPlayer().getName().equals("Mike Wazowski")){
             pRect.setFill(Color.GREEN);
@@ -584,19 +588,16 @@ public class Main extends Application {
         pRect.heightProperty().bind(stage.widthProperty().multiply(0.015)); 
         pImage.widthProperty().bind(stage.widthProperty().multiply(0.015));
         pImage.heightProperty().bind(stage.widthProperty().multiply(0.015));
-    
         Label pEnergy = new Label(player.getEnergy() + "");
         pEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
         playerUI.getChildren().addAll(pRect, pEnergy,pImage);
         
         monsterContainers.get(player.getPosition()).getChildren().add(playerUI);
-        
         // 3. Draw Opponent in their new position
         StackPane opponentUI = new StackPane();
         Rectangle oRect = new Rectangle(); 
         Rectangle oImage = new Rectangle();
         oRect.setFill(Color.MAGENTA);
-        
         //setting opponent image 
         if(myGame.getOpponent().getName().equals("Mike Wazowski")){
             oRect.setFill(Color.GREEN);
@@ -643,7 +644,6 @@ public class Main extends Application {
         oRect.heightProperty().bind(stage.widthProperty().multiply(0.015)); 
         oImage.widthProperty().bind(stage.widthProperty().multiply(0.015));
         oImage.heightProperty().bind(stage.widthProperty().multiply(0.015));
-
         Label oEnergy = new Label(opponent.getEnergy() + "");
         oEnergy.setStyle("-fx-font-size: 8px; -fx-text-fill: black; -fx-font-weight: bold;");
         opponentUI.getChildren().addAll(oRect, oEnergy,oImage);
@@ -655,7 +655,6 @@ public class Main extends Application {
 
         if (currentturnLabel != null) {
             currentturnLabel.setText("Current Turn: " + myGame.getCurrent().getName());
-            
             // ── Format Player Stats ──
             String pStats = "Name: " + player.getName() + "\n\n" +
                             "Original Role: " + player.getOriginalRole() + "\n" +
@@ -696,14 +695,13 @@ public class Main extends Application {
         availableImages.add("file:Resources/Images/James p.Sullivan.jpg");
         availableImages.add("file:Resources/Images/Randall Boggs.jpg");
         availableImages.add("file:Resources/Images/Celia Mae.jpg");
-        
         String pName = myGame.getPlayer().getName();
         String oName = myGame.getOpponent().getName();
-        String pFile = pName.equals("James P. Sullivan") ? "James p.sullivan" : 
+        String pFile = pName.equals("James P. Sullivan") ?
+        "James p.Sullivan" : 
                        (pName.equals("Henry J. Waternoose") ? "Henry J.Waternoose" : pName);
-        String oFile = oName.equals("James P. Sullivan") ? "James p.sullivan" : 
+        String oFile = oName.equals("James P. Sullivan") ? "James p.Sullivan" : 
                        (oName.equals("Henry J. Waternoose") ? "Henry J.Waternoose" : oName);
-                       
         availableImages.remove("file:Resources/Images/" + pFile + ".jpg");
         availableImages.remove("file:Resources/Images/" + oFile + ".jpg");
         
@@ -741,16 +739,19 @@ public class Main extends Application {
                 uiCell.getChildren().add(numberLabel);
 
                 if(backendCell instanceof MonsterCell){
-                    Random rand = new Random();
-                    String chosenPath = availableImages.get(rand.nextInt(availableImages.size()));
-                    Image chosen = new Image(chosenPath);
-                    ImageView monsterImage = new ImageView(chosen);
-                    monsterImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.6));
-                    monsterImage.fitHeightProperty().bind(grid.heightProperty().divide(Constants.BOARD_ROWS).multiply(0.6));
-                    uiCell.getChildren().add(monsterImage);
-                    uiCell.setAlignment(monsterImage, Pos.CENTER);
-                    availableImages.remove(chosenPath);
+                    if (!availableImages.isEmpty()) {
+                        Random rand = new Random();
+                        String chosenPath = availableImages.get(rand.nextInt(availableImages.size()));
+                        Image chosen = new Image(chosenPath);
+                        ImageView monsterImage = new ImageView(chosen);
+                        monsterImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.6));
+                        monsterImage.fitHeightProperty().bind(grid.heightProperty().divide(Constants.BOARD_ROWS).multiply(0.6));
+                        uiCell.getChildren().add(monsterImage);
+                        uiCell.setAlignment(monsterImage, Pos.CENTER);
+                        availableImages.remove(chosenPath);
+                    }
                 }
+                
 
                 if(backendCell instanceof CardCell){
                     ImageView cardImage = new ImageView(new Image("file:Resources/Images/Card.jpg"));
@@ -767,7 +768,6 @@ public class Main extends Application {
                     uiCell.getChildren().add(conveyorImage);
                     uiCell.setAlignment(conveyorImage,Pos.CENTER);
                 }
-                
                 if(backendCell instanceof ContaminationSock){
                     ImageView sockImage = new ImageView(new Image("file:Resources/Images/Sock.jpg"));
                     sockImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.6));
@@ -784,12 +784,11 @@ public class Main extends Application {
                     
                     ImageView closedDoorImage = new ImageView(new Image("file:Resources/Images/closed door.jpeg"));
                     
-                    // ── CHANGED: Apply a color tint directly to the door image itself! ──
                     ColorAdjust doorTint = new ColorAdjust();
                     if (((DoorCell) backendCell).getRole() == Role.LAUGHER) {
-                        doorTint.setHue(0.4); // Tint it towards Green
+                        doorTint.setHue(0.4);
                     } else {
-                        doorTint.setHue(-0.3); // Tint it towards Red
+                        doorTint.setHue(-0.3);
                     }
                     closedDoorImage.setEffect(doorTint);
                     
@@ -800,6 +799,7 @@ public class Main extends Application {
                     uiCell.setAlignment(closedDoorImage,Pos.BOTTOM_RIGHT);
                     doorImageViews[index] = closedDoorImage;
                 }
+            
 
                 HBox charactersBox = new HBox(5);
                 charactersBox.setAlignment(Pos.BOTTOM_CENTER);
@@ -808,7 +808,7 @@ public class Main extends Application {
 
                 int gridRow = (Constants.BOARD_ROWS - 1) - row;
                 grid.add(uiCell, col, gridRow);
-            }
+        }
         }
       
         // ── BUTTON CONTROLS ──
@@ -822,20 +822,24 @@ public class Main extends Application {
                 Monster activeMonster = myGame.getCurrent();
                 Boolean hadShield = activeMonster.isShielded();
                 int initialE = activeMonster.getEnergy();
-
+                
                 myGame.playTurn();
+    
                 diceRes.setText("Rolled: " + myGame.getRoll());
 
+ 
                 if(activeMonster.getPosition() == Constants.WINNING_POSITION && activeMonster.getEnergy()>= Constants.WINNING_ENERGY){
                     ButtonType mainMenu= new ButtonType("Main Menu");
                     ButtonType gameQuit = new ButtonType("Quit game :-( ");
 
+            
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
                     gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
                     gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
                      + myGame.getPlayer().getName() + "'s energy: " + myGame.getPlayer().getEnergy() + "\n"
                     +  myGame.getOpponent().getName() + "'s energy: " +  myGame.getOpponent().getEnergy()  );
+              
                     gameAlert.getButtonTypes().setAll(gameQuit, mainMenu);
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
@@ -844,7 +848,7 @@ public class Main extends Application {
                         gameBeaten = true;
                         
                         if (gameMusicPlayer != null) gameMusicPlayer.stop(); // Stop game music
-                        if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume menu music
+                        if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play(); // Resume menu music
                         
                         mainMenuScene.setRoot(layout);
                         stage.setScene(mainMenuScene);
@@ -853,6 +857,7 @@ public class Main extends Application {
                         stage.close();
                     }
                 }
+    
 
                 if(initialE>activeMonster.getEnergy()){
                     Alert damageAlert = new Alert(AlertType.INFORMATION);
@@ -861,40 +866,39 @@ public class Main extends Application {
                     damageAlert.setContentText(activeMonster.getName() + " Lost " + (initialE-activeMonster.getEnergy()) + " Energy");
                     damageAlert.showAndWait();
                 }
-                
                 if(!activeMonster.isShielded() && hadShield){
+        
                     Alert shieldAlert = new Alert(AlertType.INFORMATION);
                     shieldAlert.setTitle("Shield Alert");
                     shieldAlert.setHeaderText("You used your shield ");
                     shieldAlert.setContentText(activeMonster.getName() +" used their shield to block the negative energy effect !!");
+        
                     shieldAlert.showAndWait();
                 }
-                
                 if(myGame.getRoll() ==0 ){
                     Alert frozAlert = new Alert(AlertType.ERROR);
                     frozAlert.setTitle("FREEZE !");
+         
                     frozAlert.setHeaderText("You are Frozen !");
                     frozAlert.setContentText("Turn is skipped because you are frozen ! better luck next time :P");
                     frozAlert.showAndWait();
                 }
-                
                 if(myGame.getBoard().getCards().size()< deckSizeBefore){
                     Alert cardAlert = new Alert(AlertType.INFORMATION);
+                   
                     cardAlert.setTitle("LANDED ON CARD CELL !!");
-                    
                     if(currentCard instanceof ConfusionCard){
                         cardAlert.setHeaderText(activeMonster.getName() + " drew " + currentCard.getName() + " this is a " + currentCard.getClass().getSimpleName());
                         cardAlert.setContentText("Both monsters are confused causing them to swap roles for " + activeMonster.getConfusionTurns() + " Turns");
                     }
                     else{
-                        cardAlert.setHeaderText(activeMonster.getName() +" drew " + currentCard.getName() + " this is a " + currentCard.getClass().getSimpleName());
-                        cardAlert.setContentText("This card does the following: " + currentCard.getDescription());
+                    cardAlert.setHeaderText(activeMonster.getName() +" drew " + currentCard.getName() + " this is a " + currentCard.getClass().getSimpleName());
+                    cardAlert.setContentText("This card does the following: " + currentCard.getDescription());
                     }
                     cardAlert.showAndWait();
                 }
                
                 updateMonsters();
-                
             } catch (InvalidMoveException ex) {
                 Alert  oppLand = new Alert(AlertType.ERROR);
                 oppLand.setTitle("Invalid Move!");
@@ -903,13 +907,13 @@ public class Main extends Application {
                 oppLand.showAndWait();
             }
         });
-        
         activatePowerUpBtn.setOnAction(e -> {
             try {
                 myGame.usePowerup();
                 updateMonsters(); 
             } catch (OutOfEnergyException ex) {
                 Alert energyAlert = new Alert(AlertType.ERROR);
+                
                 energyAlert.setTitle("Energy Alert ! ");
                 energyAlert.setHeaderText("Not enough energy");
                 energyAlert.setContentText(myGame.getCurrent().getName() + " doesnt have enough energy to activate powerup :-( ");
@@ -918,6 +922,7 @@ public class Main extends Application {
         });
 
         // ── CUSTOM PAUSE MENU OVERLAY ──
+  
         VBox pauseOverlay  = new VBox();
         pauseOverlay.setAlignment(Pos.CENTER);
         pauseOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.6);"); 
@@ -939,14 +944,16 @@ public class Main extends Application {
         pauseMenuBox.getChildren().addAll(pauseTitle, resumeBtn, quitToMenuBtn);
         pauseOverlay.getChildren().add(pauseMenuBox);
 
+     
         resumeBtn.setOnAction(e -> pauseOverlay.setVisible(false)); 
         quitToMenuBtn.setOnAction(e -> {
             if (gameMusicPlayer != null) gameMusicPlayer.stop(); // Stop game music
-            if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume menu music
+            if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play(); // Resume menu music
             
             pauseOverlay.setVisible(false); 
             mainMenuScene.setRoot(layout);
-            stage.setScene(mainMenuScene);
+       
+             stage.setScene(mainMenuScene);
         });
 
         HBox controlsBox = new HBox(20);
@@ -956,7 +963,6 @@ public class Main extends Application {
 
         // ── FINAL LAYOUT ──
         BorderPane root = new BorderPane();
-        
         // ── ARROW DRAWING LAYER ──
         StackPane centerStack = new StackPane();
         Pane arrowPane = new Pane();
@@ -1013,7 +1019,6 @@ public class Main extends Application {
         root.setLeft(leftSidebar);
         root.setRight(rightSidebar);
         root.setTop(topCenterBox);
-        
         // ── GAME MUSIC TOGGLE BUTTON ──
         Button toggleGameMusicBtn = new Button("🔊 Mute Music");
         toggleGameMusicBtn.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
@@ -1024,14 +1029,14 @@ public class Main extends Application {
                 gameMusicPlayer.setMute(!isMuted);
                 toggleGameMusicBtn.setText(!isMuted ? "🔇 Unmute Music" : "🔊 Mute Music");
             }
-        });
+       
+         });
         
         StackPane basePane = new StackPane();
         StackPane.setAlignment(toggleGameMusicBtn, Pos.BOTTOM_LEFT);
         StackPane.setMargin(toggleGameMusicBtn, new Insets(20));
         
         basePane.getChildren().addAll(root, toggleGameMusicBtn, pauseOverlay);
-        
         Scene boardScene = new Scene(basePane, screenWidth, screenHeight);
         stage.setScene(boardScene);
         
@@ -1041,6 +1046,7 @@ public class Main extends Application {
             
             if (event.getCode() == KeyCode.W) {
                 myGame.getCurrent().setPosition(99);
+                
                 System.out.println("CHEAT ACTIVATED: Teleported to Cell 99!");
                 updateMonsters(); 
 
@@ -1048,21 +1054,25 @@ public class Main extends Application {
                     ButtonType mainMenu= new ButtonType("Main Menu");
                     ButtonType gameQuit = new ButtonType("Quit game :-( ");
 
+      
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
                     gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
                     gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
-                     + myGame.getPlayer().getName() + "'s energy: " + myGame.getPlayer().getEnergy() + "\n"
+       
+                      + myGame.getPlayer().getName() + "'s energy: " + myGame.getPlayer().getEnergy() + "\n"
                     +  myGame.getOpponent().getName() + "'s energy: " +  myGame.getOpponent().getEnergy()  );
                     gameAlert.getButtonTypes().setAll(gameQuit, mainMenu);
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
                         // ── TRIGGER EASTER EGG UNLOCK ──
-                        gameBeaten = true;
+               
+                         gameBeaten = true;
                         
                         if (gameMusicPlayer != null) gameMusicPlayer.stop(); // Stop game music
-                        if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume menu music
+                        if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play();
+                        // Resume menu music
                         
                         mainMenuScene.setRoot(layout);
                         stage.setScene(mainMenuScene);
@@ -1084,18 +1094,22 @@ public class Main extends Application {
                     Alert gameAlert = new Alert(AlertType.CONFIRMATION);
                     gameAlert.setTitle("Game over");
                     gameAlert.setHeaderText("The " + activeMonster.getOriginalRole() + "'s Won the game!!! ");
-                    gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
+                   
+                     gameAlert.setContentText(activeMonster.getName() + " Won!!" + "\n"
                      + myGame.getPlayer().getName() + "'s energy: " + myGame.getPlayer().getEnergy() + "\n"
                     +  myGame.getOpponent().getName() + "'s energy: " +  myGame.getOpponent().getEnergy()  );
                     gameAlert.getButtonTypes().setAll( mainMenu,gameQuit);
+            
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
                         // ── TRIGGER EASTER EGG UNLOCK ──
                         gameBeaten = true;
                         
-                        if (gameMusicPlayer != null) gameMusicPlayer.stop(); // Stop game music
-                        if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume menu music
+                        if (gameMusicPlayer != null) gameMusicPlayer.stop();
+                        // Stop game music
+                        if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play();
+                        // Resume menu music
                         
                         mainMenuScene.setRoot(layout);
                         stage.setScene(mainMenuScene);
