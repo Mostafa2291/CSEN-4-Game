@@ -17,6 +17,9 @@ import javafx.util.Duration;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 
+// Effect for Tinting Doors
+import javafx.scene.effect.ColorAdjust;
+
 import javafx.scene.input.KeyCode;
 import game.engine.Board;
 import game.engine.Constants;
@@ -252,7 +255,10 @@ public class Main extends Application {
         continuePrompt.setLayoutX(20);
         continuePrompt.layoutYProperty().bind(stage.heightProperty().subtract(80));
 
-        interactiveInstructionPane.getChildren().addAll(instBg, sulleyBubble, mikeBubble, continuePrompt);
+        backInstructions.setLayoutX(20);
+        backInstructions.setLayoutY(20);
+
+        interactiveInstructionPane.getChildren().addAll(instBg, sulleyBubble, mikeBubble, continuePrompt, backInstructions);
         Scene instructionScene = new Scene(interactiveInstructionPane, screenWidth, screenHeight);
 
         String[][] dialogues = {
@@ -416,6 +422,13 @@ public class Main extends Application {
         back.setOnMouseEntered(e -> back.setText("> Go Back"));
         back.setOnMouseExited(e  -> back.setText("Go Back"));
 
+        backInstructions.setOnAction(e -> {
+            if (finalMumble != null) finalMumble.stop();
+            if (typingTimeline[0] != null) typingTimeline[0].stop();
+            stage.setScene(mainMenuScene);
+            mainMenuScene.setRoot(layout);
+        });
+
         quit.setOnAction(e -> stage.close());
         quit.setOnMouseEntered(e -> quit.setText("> Quit :("));
         quit.setOnMouseExited(e  -> quit.setText("Quit"));
@@ -469,6 +482,14 @@ public class Main extends Application {
         }
         else if (modelCell instanceof ContaminationSock){
             cssColor = "GreenYellow";
+        }
+        else if (modelCell instanceof DoorCell){
+            // ── CHANGED: Cell background turns Green for Laugher doors and Red for Scarer doors! ──
+            if (((DoorCell) modelCell).getRole() == Role.LAUGHER) {
+                cssColor = "palegreen"; 
+            } else {
+                cssColor = "lightsalmon"; 
+            }
         }
         else {
             cssColor = "papayawhip";
@@ -762,6 +783,15 @@ public class Main extends Application {
                     uiCell.getChildren().add(energyLabel);
                     
                     ImageView closedDoorImage = new ImageView(new Image("file:Resources/Images/closed door.jpeg"));
+                    
+                    // ── CHANGED: Apply a color tint directly to the door image itself! ──
+                    ColorAdjust doorTint = new ColorAdjust();
+                    if (((DoorCell) backendCell).getRole() == Role.LAUGHER) {
+                        doorTint.setHue(0.4); // Tint it towards Green
+                    } else {
+                        doorTint.setHue(-0.3); // Tint it towards Red
+                    }
+                    closedDoorImage.setEffect(doorTint);
                     
                     closedDoorImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.3));
                     closedDoorImage.fitHeightProperty().bind(grid.heightProperty().divide(Constants.BOARD_ROWS).multiply(0.3));
