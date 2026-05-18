@@ -13,6 +13,10 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.util.Duration;
 
+// Drawing Shapes for Arrows
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Polygon;
+
 import javafx.scene.input.KeyCode;
 import game.engine.Board;
 import game.engine.Constants;
@@ -173,7 +177,7 @@ public class Main extends Application {
             if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play();
         });
         
-        // Add all elements to the Main Menu layout (Removed the old "what is this" button)
+        // Add all elements to the Main Menu layout
         layout.getChildren().addAll(menuButtons, toggleMusicBtn, videoOverlay);
         
         BackgroundImage menuBG = new BackgroundImage(
@@ -248,9 +252,6 @@ public class Main extends Application {
         continuePrompt.setLayoutX(20);
         continuePrompt.layoutYProperty().bind(stage.heightProperty().subtract(80));
 
-        backInstructions.setLayoutX(20);
-        backInstructions.setLayoutY(20);
-
         interactiveInstructionPane.getChildren().addAll(instBg, sulleyBubble, mikeBubble, continuePrompt);
         Scene instructionScene = new Scene(interactiveInstructionPane, screenWidth, screenHeight);
 
@@ -260,7 +261,7 @@ public class Main extends Application {
             {"MIKE", "Move across a 100-cell board! Watch out for Energy Doors, Conveyor Belts, and... ugh... Contamination Socks."},
             {"SULLEY", "Every turn, you can use a powerup, roll the dice, and move. But beware, cards and socks change everything."},
             {"MIKE", "Pick your style! Dashers are fast, Dynamos get huge energy, Multitaskers balance it, and Schemers... well, they scheme."},
-            {"SULLEY", "To win, hit Boo's Door at cell 99 with 1000+ energy. Will you scare… or make them laugh? also, i heard something weird happens if you press CTRL + F after winning a game....  "}
+            {"SULLEY", "To win, hit Boo's Door at cell 99 with 1000+ energy. Will you scare… or make them laugh? also, i heard something weird happens if you press CTRL + F after winning a game...."}
         };
 
         int[] state = {0}; 
@@ -414,13 +415,6 @@ public class Main extends Application {
         back.setOnAction(e -> stage.getScene().setRoot(layout));
         back.setOnMouseEntered(e -> back.setText("> Go Back"));
         back.setOnMouseExited(e  -> back.setText("Go Back"));
-
-        backInstructions.setOnAction(e -> {
-            if (finalMumble != null) finalMumble.stop();
-            if (typingTimeline[0] != null) typingTimeline[0].stop();
-            stage.setScene(mainMenuScene);
-            mainMenuScene.setRoot(layout);
-        });
 
         quit.setOnAction(e -> stage.close());
         quit.setOnMouseEntered(e -> quit.setText("> Quit :("));
@@ -932,7 +926,27 @@ public class Main extends Application {
 
         // ── FINAL LAYOUT ──
         BorderPane root = new BorderPane();
-        root.setCenter(grid);
+        
+        // ── ARROW DRAWING LAYER ──
+        StackPane centerStack = new StackPane();
+        Pane arrowPane = new Pane();
+        arrowPane.setMouseTransparent(true);
+        
+        int[] conveyorStarts = {6, 22, 44, 52, 66};
+        int[] conveyorEffects = {25, 15, 11, 10, 2};
+        for(int i=0; i<conveyorStarts.length; i++) {
+            drawArrow(arrowPane, grid, conveyorStarts[i], conveyorStarts[i] + conveyorEffects[i], true);
+        }
+        
+        int[] sockStarts = {32, 42, 74, 84, 98};
+        int[] sockEffects = {-6, -12, -10, -14, -22};
+        for(int i=0; i<sockStarts.length; i++) {
+            drawArrow(arrowPane, grid, sockStarts[i], sockStarts[i] + sockEffects[i], false);
+        }
+
+        centerStack.getChildren().addAll(grid, arrowPane);
+        root.setCenter(centerStack);
+        
         root.setBottom(controlsBox);
 
         VBox leftSidebar = new VBox(10);
@@ -1071,5 +1085,67 @@ public class Main extends Application {
 
         // Call update monsters for initial starting pos 
         updateMonsters();
+    }
+    
+    // ── METHOD TO DRAW DYNAMIC ARROWS ACROSS THE BOARD ──
+    private void drawArrow(Pane pane, GridPane grid, int startIndex, int endIndex, boolean isConveyor) {
+        int startRow = startIndex / Constants.BOARD_COLS;
+        int startCol = (startRow % 2 == 1) ? (Constants.BOARD_COLS - 1) - (startIndex % Constants.BOARD_COLS) : startIndex % Constants.BOARD_COLS;
+        int startGridRow = (Constants.BOARD_ROWS - 1) - startRow;
+
+        int endRow = endIndex / Constants.BOARD_COLS;
+        int endCol = (endRow % 2 == 1) ? (Constants.BOARD_COLS - 1) - (endIndex % Constants.BOARD_COLS) : endIndex % Constants.BOARD_COLS;
+        int endGridRow = (Constants.BOARD_ROWS - 1) - endRow;
+
+        Line line = new Line();
+        line.setStrokeWidth(5);
+        line.setStroke(isConveyor ? Color.SPRINGGREEN : Color.CRIMSON);
+        line.setOpacity(0.8);
+        line.getStrokeDashArray().addAll(10d, 10d); // Dashed lines so it looks like a track
+
+        line.startXProperty().bind(grid.widthProperty().multiply((startCol + 0.5) / Constants.BOARD_COLS));
+        line.startYProperty().bind(grid.heightProperty().multiply((startGridRow + 0.5) / Constants.BOARD_ROWS));
+        line.endXProperty().bind(grid.widthProperty().multiply((endCol + 0.5) / Constants.BOARD_COLS));
+        line.endYProperty().bind(grid.heightProperty().multiply((endGridRow + 0.5) / Constants.BOARD_ROWS));
+
+        Polygon arrowhead = new Polygon();
+        arrowhead.setFill(isConveyor ? Color.SPRINGGREEN : Color.CRIMSON);
+        arrowhead.setOpacity(0.8);
+
+        Runnable updateArrowHead = () -> {
+            double sx = line.getStartX();
+            double sy = line.getStartY();
+            double ex = line.getEndX();
+            double ey = line.getEndY();
+            if (sx == ex && sy == ey) return;
+            
+            double angle = Math.atan2(ey - sy, ex - sx);
+            double pullBack = 15.0; // Keeps arrowhead from covering cell numbers
+            double targetX = ex - pullBack * Math.cos(angle);
+            double targetY = ey - pullBack * Math.sin(angle);
+            
+            double size = 15.0;
+            double angle1 = angle - Math.PI / 6.0; 
+            double angle2 = angle + Math.PI / 6.0; 
+            
+            double p1x = targetX - size * Math.cos(angle1);
+            double p1y = targetY - size * Math.sin(angle1);
+            
+            double p2x = targetX - size * Math.cos(angle2);
+            double p2y = targetY - size * Math.sin(angle2);
+            
+            arrowhead.getPoints().setAll(
+                targetX, targetY,
+                p1x, p1y,
+                p2x, p2y
+            );
+        };
+        
+        line.startXProperty().addListener((obs, oldV, newV) -> updateArrowHead.run());
+        line.startYProperty().addListener((obs, oldV, newV) -> updateArrowHead.run());
+        line.endXProperty().addListener((obs, oldV, newV) -> updateArrowHead.run());
+        line.endYProperty().addListener((obs, oldV, newV) -> updateArrowHead.run());
+
+        pane.getChildren().addAll(line, arrowhead);
     }
 }
