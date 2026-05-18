@@ -72,6 +72,9 @@ public class Main extends Application {
     private static MediaPlayer menuMusicPlayer;
     private static MediaPlayer gameMusicPlayer;
     private static MediaPlayer videoPlayer;
+    
+    // Easter Egg Tracker
+    private boolean gameBeaten = false;
 
     public static void main(String[] args) {
         launch(args);
@@ -147,12 +150,7 @@ public class Main extends Application {
         StackPane.setAlignment(toggleMusicBtn, Pos.BOTTOM_LEFT);
         StackPane.setMargin(toggleMusicBtn, new Insets(20));
 
-        // ── EASTER EGG VIDEO SETUP ──
-        Button whatIsThisBtn = new Button("what is this");
-        whatIsThisBtn.setStyle("-fx-font-size: 10px; -fx-padding: 5px;");
-        StackPane.setAlignment(whatIsThisBtn, Pos.BOTTOM_RIGHT);
-        StackPane.setMargin(whatIsThisBtn, new Insets(20));
-
+        // ── EASTER EGG VIDEO SETUP (Hidden) ──
         StackPane videoOverlay = new StackPane();
         videoOverlay.setStyle("-fx-background-color: black;");
         videoOverlay.setVisible(false);
@@ -169,41 +167,14 @@ public class Main extends Application {
 
         videoOverlay.getChildren().addAll(videoView, closeVideoBtn);
 
-        whatIsThisBtn.setOnAction(e -> {
-            try {
-                if (menuMusicPlayer != null) menuMusicPlayer.pause();
-                
-                String videoPath = new java.io.File("Resources/Video/whatisthis.mp4").getAbsolutePath();
-                Media videoMedia = new Media(new java.io.File(videoPath).toURI().toString());
-                
-                if (videoPlayer != null) {
-                    videoPlayer.stop();
-                }
-                
-                videoPlayer = new MediaPlayer(videoMedia);
-                videoView.setMediaPlayer(videoPlayer);
-                videoOverlay.setVisible(true);
-                videoPlayer.play();
-
-                // Auto-close when the video finishes
-                videoPlayer.setOnEndOfMedia(() -> {
-                    videoOverlay.setVisible(false);
-                    if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play();
-                });
-
-            } catch (Exception ex) {
-                System.out.println("Video failed to load. Make sure whatisthis.mp4 is inside Resources/Video/");
-            }
-        });
-
         closeVideoBtn.setOnAction(e -> {
             if (videoPlayer != null) videoPlayer.stop();
             videoOverlay.setVisible(false);
             if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play();
         });
         
-        // Add all elements to the Main Menu layout
-        layout.getChildren().addAll(menuButtons, toggleMusicBtn, whatIsThisBtn, videoOverlay);
+        // Add all elements to the Main Menu layout (Removed the old "what is this" button)
+        layout.getChildren().addAll(menuButtons, toggleMusicBtn, videoOverlay);
         
         BackgroundImage menuBG = new BackgroundImage(
             new Image("file:Resources/Images/background2.jpg"),
@@ -289,7 +260,7 @@ public class Main extends Application {
             {"MIKE", "Move across a 100-cell board! Watch out for Energy Doors, Conveyor Belts, and... ugh... Contamination Socks."},
             {"SULLEY", "Every turn, you can use a powerup, roll the dice, and move. But beware, cards and socks change everything."},
             {"MIKE", "Pick your style! Dashers are fast, Dynamos get huge energy, Multitaskers balance it, and Schemers... well, they scheme."},
-            {"SULLEY", "To win, hit Boo's Door at cell 99 with 1000+ energy. Will you scare… or make them laugh?"}
+            {"SULLEY", "To win, hit Boo's Door at cell 99 with 1000+ energy. Will you scare… or make them laugh? also, i heard something weird happens if you press CTRL + F after winning a game....  "}
         };
 
         int[] state = {0}; 
@@ -384,10 +355,39 @@ public class Main extends Application {
         // ── Scene Setup ───────────────────────────────────────────────────────
         mainMenuScene = new Scene(layout, screenWidth, screenHeight);
         
-        // F11 Toggle for Main Menu
+        // Main Menu Key Handlers (F11 and the Ctrl+F Easter Egg)
         mainMenuScene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F11) {
                 stage.setFullScreen(!stage.isFullScreen());
+            } 
+            // ── HIDDEN EASTER EGG (CTRL + F) ──
+            else if (event.isControlDown() && event.getCode() == KeyCode.F) {
+                if (gameBeaten) { // Only works if they have completed a game!
+                    try {
+                        if (menuMusicPlayer != null) menuMusicPlayer.pause();
+                        
+                        String videoPath = new java.io.File("Resources/Video/whatisthis.mp4").getAbsolutePath();
+                        Media videoMedia = new Media(new java.io.File(videoPath).toURI().toString());
+                        
+                        if (videoPlayer != null) {
+                            videoPlayer.stop();
+                        }
+                        
+                        videoPlayer = new MediaPlayer(videoMedia);
+                        videoView.setMediaPlayer(videoPlayer);
+                        videoOverlay.setVisible(true);
+                        videoPlayer.play();
+
+                        // Auto-close when the video finishes
+                        videoPlayer.setOnEndOfMedia(() -> {
+                            videoOverlay.setVisible(false);
+                            if (menuMusicPlayer != null && !menuMusicPlayer.isMute()) menuMusicPlayer.play();
+                        });
+
+                    } catch (Exception ex) {
+                        System.out.println("Video failed to load. Make sure whatisthis.mp4 is inside Resources/Video/");
+                    }
+                }
             }
         });
 
@@ -483,7 +483,6 @@ public class Main extends Application {
         pane.setStyle("-fx-background-color: " + cssColor + "; -fx-border-color: black; -fx-border-width: 0.5px;");
         pane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         
-        // ── BUG FIX: This completely stops the cells from stretching to fit the images! ──
         pane.setMinSize(0, 0); 
         
         return pane;
@@ -731,11 +730,8 @@ public class Main extends Application {
                     String chosenPath = availableImages.get(rand.nextInt(availableImages.size()));
                     Image chosen = new Image(chosenPath);
                     ImageView monsterImage = new ImageView(chosen);
-                    
-                    // ── BUG FIX: Bind image size to the GRID width, not the CELL width ──
                     monsterImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.6));
                     monsterImage.fitHeightProperty().bind(grid.heightProperty().divide(Constants.BOARD_ROWS).multiply(0.6));
-                    
                     uiCell.getChildren().add(monsterImage);
                     uiCell.setAlignment(monsterImage, Pos.CENTER);
                     availableImages.remove(chosenPath);
@@ -743,33 +739,24 @@ public class Main extends Application {
 
                 if(backendCell instanceof CardCell){
                     ImageView cardImage = new ImageView(new Image("file:Resources/Images/Card.jpg"));
-                    
-                    // ── BUG FIX: Bind image size to the GRID width, not the CELL width ──
                     cardImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.6));
                     cardImage.fitHeightProperty().bind(grid.heightProperty().divide(Constants.BOARD_ROWS).multiply(0.6));
-                    
                     uiCell.getChildren().add(cardImage);
                     uiCell.setAlignment(cardImage,Pos.CENTER);
                 }
 
                 if(backendCell instanceof ConveyorBelt){
                     ImageView conveyorImage = new ImageView(new Image("file:Resources/Images/Conveyer.jpg"));
-                    
-                    // ── BUG FIX: Bind image size to the GRID width, not the CELL width ──
                     conveyorImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.6));
                     conveyorImage.fitHeightProperty().bind(grid.heightProperty().divide(Constants.BOARD_ROWS).multiply(0.6));
-                    
                     uiCell.getChildren().add(conveyorImage);
                     uiCell.setAlignment(conveyorImage,Pos.CENTER);
                 }
                 
                 if(backendCell instanceof ContaminationSock){
                     ImageView sockImage = new ImageView(new Image("file:Resources/Images/Sock.jpg"));
-                    
-                    // ── BUG FIX: Bind image size to the GRID width, not the CELL width ──
                     sockImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.6));
                     sockImage.fitHeightProperty().bind(grid.heightProperty().divide(Constants.BOARD_ROWS).multiply(0.6));
-                    
                     uiCell.getChildren().add(sockImage);
                     uiCell.setAlignment(sockImage,Pos.CENTER);
                 }
@@ -782,7 +769,6 @@ public class Main extends Application {
                     
                     ImageView closedDoorImage = new ImageView(new Image("file:Resources/Images/closed door.jpeg"));
                     
-                    // ── BUG FIX: Bind image size to the GRID width, not the CELL width ──
                     closedDoorImage.fitWidthProperty().bind(grid.widthProperty().divide(Constants.BOARD_COLS).multiply(0.3));
                     closedDoorImage.fitHeightProperty().bind(grid.heightProperty().divide(Constants.BOARD_ROWS).multiply(0.3));
                     
@@ -830,6 +816,9 @@ public class Main extends Application {
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
+                        // ── TRIGGER EASTER EGG UNLOCK ──
+                        gameBeaten = true;
+                        
                         if (gameMusicPlayer != null) gameMusicPlayer.stop(); // Stop game music
                         if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume menu music
                         
@@ -994,7 +983,6 @@ public class Main extends Application {
         });
         
         StackPane basePane = new StackPane();
-        // Add the toggle button to the bottom left corner of the base pane
         StackPane.setAlignment(toggleGameMusicBtn, Pos.BOTTOM_LEFT);
         StackPane.setMargin(toggleGameMusicBtn, new Insets(20));
         
@@ -1026,6 +1014,9 @@ public class Main extends Application {
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
+                        // ── TRIGGER EASTER EGG UNLOCK ──
+                        gameBeaten = true;
+                        
                         if (gameMusicPlayer != null) gameMusicPlayer.stop(); // Stop game music
                         if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume menu music
                         
@@ -1056,6 +1047,9 @@ public class Main extends Application {
                     Optional <ButtonType> result = gameAlert.showAndWait();
 
                     if(result.isPresent() && result.get() == mainMenu){
+                        // ── TRIGGER EASTER EGG UNLOCK ──
+                        gameBeaten = true;
+                        
                         if (gameMusicPlayer != null) gameMusicPlayer.stop(); // Stop game music
                         if (menuMusicPlayer != null) menuMusicPlayer.play(); // Resume menu music
                         
