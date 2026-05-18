@@ -258,7 +258,7 @@ public class Main extends Application {
         backInstructions.setLayoutX(20);
         backInstructions.setLayoutY(20);
 
-        interactiveInstructionPane.getChildren().addAll(instBg, sulleyBubble, mikeBubble, continuePrompt, backInstructions);
+        interactiveInstructionPane.getChildren().addAll(instBg, sulleyBubble, mikeBubble, continuePrompt);
         Scene instructionScene = new Scene(interactiveInstructionPane, screenWidth, screenHeight);
 
         String[][] dialogues = {
